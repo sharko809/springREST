@@ -20,7 +20,7 @@
         <Root level="debug">
             <AppenderRef ref="logFile" level="warn"/>
         </Root>
-        <Logger name="movieappspring" level="debug">
+        <Logger name="com.serviceapp" level="debug">
             <AppenderRef ref="Console" level="debug"/>
             <AppenderRef ref="logFile" level="warn"/>
         </Logger>
