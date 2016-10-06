@@ -43,6 +43,11 @@ public class MovieServiceTest {
     }
 
     @Test
+    public void deleteMovie() {
+        movieService.deleteMovie(null);
+    }
+
+    @Test
     public void ifMovieExists() throws Exception {
         assertTrue(movieService.ifMovieExists(OK_ID));
         assertFalse(movieService.ifMovieExists(NEGATIVE_ID));
@@ -97,7 +102,7 @@ public class MovieServiceTest {
 
     @Test
     public void findAllPaged() {
-        // TODO
+        assertTrue(movieService.findAllPaged(null).getNumberOfElements() == 5);
     }
 
 }

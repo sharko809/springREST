@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -138,12 +139,13 @@ public class MovieService {
     /**
      * Get all <code>Movie</code> entities from database limited by <code>pageable</code> property
      *
-     * @param pageable object implementing <code>Pageable</code> interface. Serves for pagination and sorting
+     * @param pageable object implementing <code>Pageable</code> interface. Serves for pagination and sorting. If
+     *                 <code>null</code> - default scenario will be used (first 5 results).
      * @return iterable <code>Page</code> with <code>Movie</code> objects limited by params specified by
      * <code>pageable</code>, otherwise returns <code>null</code>
      */
     public Page<Movie> findAllPaged(Pageable pageable) {
-        return movieRepository.findAll(pageable);
+        return movieRepository.findAll(pageable == null ? new PageRequest(0, 5) : pageable);
     }
 
 }

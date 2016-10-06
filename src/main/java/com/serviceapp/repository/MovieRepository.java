@@ -99,7 +99,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     /**
      * Get all <code>Movie</code> entities from database limited by <code>pageable</code> property
      *
-     * @param pageable object implementing <code>Pageable</code> interface. Serves for pagination and sorting
+     * @param pageable object implementing <code>Pageable</code> interface. Serves for pagination and sorting. If
+     *                 <code>null</code>, method will return all entities.
      * @return iterable <code>Page</code> with <code>Movie</code> objects limited by params specified by
      * <code>pageable</code>, otherwise returns <code>null</code>
      */

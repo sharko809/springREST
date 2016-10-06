@@ -6,11 +6,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import resources.TestConfiguration;
 
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.*;
@@ -28,6 +30,7 @@ public class MovieRepositoryTest {
     private static final Long OK_ID = 1L;
     private static final Long ZERO_ID = 0L;
     private static final Long MAX_VALUE = Long.MAX_VALUE;
+    private static final PageRequest PAGE_REQUEST = new PageRequest(0, 10);
     @Autowired
     private MovieRepository movieRepository;
 
@@ -119,13 +122,13 @@ public class MovieRepositoryTest {
     @Test(expected = IllegalArgumentException.class)
     public void findByMovieNameContainsAllIgnoreCaseExceptionThrow() throws Exception {
         // must throw IllegalArgumentException if search criteria is null
-        assertNotNull(movieRepository.findByMovieNameContainsAllIgnoreCase(null, new PageRequest(0, 10)));
+        assertNotNull(movieRepository.findByMovieNameContainsAllIgnoreCase(null, PAGE_REQUEST));
     }
 
     @Test
     public void findByMovieNameContainsAllIgnoreCase() {
         // must not be null thus "" search criteria results in something like findAll()
-        Page<Movie> p = movieRepository.findByMovieNameContainsAllIgnoreCase("", new PageRequest(0, 10));
+        Page<Movie> p = movieRepository.findByMovieNameContainsAllIgnoreCase("", PAGE_REQUEST);
         assertNotNull(p);
     }
 
@@ -133,7 +136,7 @@ public class MovieRepositoryTest {
     public void findByMovieNameContainsAllIgnoreCaseEmpty() {
         // " " as search criteria finds all titles with spaces
         // alt+255 as search criteria results in empty Page<Movie> object
-        Page<Movie> p = movieRepository.findByMovieNameContainsAllIgnoreCase(" ", new PageRequest(0, 10));
+        Page<Movie> p = movieRepository.findByMovieNameContainsAllIgnoreCase(" ", PAGE_REQUEST);
         assertNotNull(p);
     }
 
@@ -145,7 +148,10 @@ public class MovieRepositoryTest {
 
     @Test
     public void findAllPaged() throws Exception {
-        // TODO
+        Page<Movie> moviesPaged = movieRepository.findAll((Pageable) null);
+        assertNotNull(moviesPaged);
+        List<Movie> movies = movieRepository.findAll();
+        assertEquals(movies.size(), moviesPaged.getTotalElements());
     }
 
 }
