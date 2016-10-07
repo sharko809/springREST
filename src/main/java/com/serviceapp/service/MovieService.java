@@ -72,7 +72,6 @@ public class MovieService {
      *
      * @param id id of movie to find. Must not be <code>null</code>, otherwise returns <code>null</code>
      * @return <code>Movie</code> object if found, otherwise returns <code>null</code>
-     * @throws IllegalArgumentException thrown if <code>id</code> is <code>null</code>
      */
     public Movie getMovie(Long id) {
         return id == null ? null : movieRepository.findOne(id);
@@ -99,7 +98,7 @@ public class MovieService {
     /**
      * Returns whether an entity of type <code>Movie</code> with the given id exists.
      *
-     * @param id id of <code>Movie</code> to check. Must not be <code>null</code>.
+     * @param id id of <code>Movie</code> to check. Must not be <code>null</code>, otherwise returns <code>false</code>
      * @return <code>true</code> if an entity with the given id exists, <code>false</code> otherwise
      */
     public Boolean ifMovieExists(Long id) {
@@ -142,7 +141,7 @@ public class MovieService {
      * @param pageable object implementing <code>Pageable</code> interface. Serves for pagination and sorting. If
      *                 <code>null</code> - default scenario will be used (first 5 results).
      * @return iterable <code>Page</code> with <code>Movie</code> objects limited by params specified by
-     * <code>pageable</code>, otherwise returns <code>null</code>
+     * <code>pageable</code>
      */
     public Page<Movie> findAllPaged(Pageable pageable) {
         return movieRepository.findAll(pageable == null ? new PageRequest(0, 5) : pageable);
