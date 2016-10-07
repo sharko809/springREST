@@ -3,6 +3,7 @@ package com.serviceapp.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
@@ -67,6 +68,11 @@ public class ApplicationConfiguration {
         Properties properties = new Properties();
         properties.put(HIBERNATE_DIALECT_PROP, HIBERNATE_DIALECT_VALUE);
         return properties;
+    }
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
+        return new PropertySourcesPlaceholderConfigurer();
     }
 
     @Bean

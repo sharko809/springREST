@@ -1,5 +1,7 @@
 package com.serviceapp.controller.advice;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,6 +19,8 @@ import java.util.Map;
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Map<String, String>> invalidArgument(HttpServletRequest request, Exception ex) {
         Map<String, String> errorResponse = new HashMap<>();
@@ -27,15 +31,14 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-//    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Requested url is not found on this resource, sorry :(")
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<String> invalidUrl() {
         return new ResponseEntity<>("Requested url is not found on this resource, sorry :(", HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Throwable.class)
-    public void getException(Throwable throwable) {
-        System.out.println("Throwable class: " + throwable.getClass());
+    public void getException(Exception ex) {
+        LOGGER.error("Class: " + ex.getClass(), ex);
     }
 
 }

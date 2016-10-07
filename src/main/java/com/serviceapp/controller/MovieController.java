@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,21 +18,23 @@ import java.util.List;
  * Created by dsharko on 10/3/2016.
  */
 @RestController
-@RequestMapping(value = "/")
 public class MovieController {
 
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final Integer RECORDS_PER_PAGE = 5;
     private MovieService movieService;
 
     @Autowired
     public MovieController(MovieService movieService) {
-        LOGGER.debug("MovieController constructor call");
         this.movieService = movieService;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<Movie> movie(@PathVariable(name = "id") Long id) {
         Movie movie = movieService.getMovie(id);
+        if (movie == null) {
+            return null;
+        }
         return new ResponseEntity<>(movie, HttpStatus.OK);
     }
 
@@ -41,8 +44,8 @@ public class MovieController {
     }
 
     @RequestMapping(value = "/count", method = RequestMethod.GET)
-    public String countMovies() {
-        return "Total movies: " + movieService.countMovies();
+    public Long countMovies() {
+        return movieService.countMovies();
     }
 
     @RequestMapping(value = "/ex", method = RequestMethod.GET)
@@ -57,6 +60,17 @@ public class MovieController {
     @RequestMapping(value = "/mov", method = RequestMethod.GET)
     public Page<Movie> paged(Pageable pageable) {
         return movieService.findAllPaged(pageable);
+    }
+
+    @RequestMapping(value = "/top", method = RequestMethod.GET)
+    public List<Movie> topRated() {
+        return movieService.findTopRated();
+    }
+
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    public Page<Movie> search(@RequestParam(name = "t", defaultValue = " ") String title, Pageable pageable) {
+        int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
+        return movieService.findMovieByTitle(title, new PageRequest(pageNumber, RECORDS_PER_PAGE, null));
     }
 
 }
