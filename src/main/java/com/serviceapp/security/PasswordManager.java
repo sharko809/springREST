@@ -3,6 +3,7 @@ package com.serviceapp.security;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,7 @@ public class PasswordManager implements PasswordEncoder {
     private static final Logger LOGGER = LogManager.getLogger();
     private Environment environment;
 
+    @Autowired
     public PasswordManager(Environment environment) {
         this.environment = environment;
     }
