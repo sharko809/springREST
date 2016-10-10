@@ -5,6 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.*;
 import java.sql.Date;
 
 /**
@@ -24,31 +25,44 @@ public class Review {
     /**
      * id of user - author of review
      */
+    @NotNull
     private Long userId;
 
     /**
      * Date when review has been posted
      */
+    @NotNull
     private Date postDate;
 
     /**
      * Title of review
      */
+    @NotNull
+    @Size(min = 3, max = 100, message = "{review.title.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яё0-9.,]+([ '-][a-zA-Zа-яА-Яё0-9.,]+)*", message = "{review.title.pattern}")
     private String title;
 
     /**
      * id of the movie which review is written to
      */
+    @NotNull
     private Long movieId;
 
     /**
      * Review text written by user
      */
+    @NotNull
+    @Size(min = 5, max = 2000, message = "{review.reviewText.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яё0-9@()!.,+&=?:\\-\"'\\[\\]{\\}]+([ '-][a-zA-Zа-яА-Яё0-9@()!.,+&=?:\\\\\"'\\-\\[\\]{\\}]+)*",
+            message = "{review.reviewText.pattern}")
     private String reviewText;
 
     /**
      * Rating given by user to movie
      */
+    @NotNull
+    @Min(value = 1, message = "{review.rating.min}")
+    @Max(value = 10, message = "{review.rating.max}")
     private Integer rating;
 
     public Review() {

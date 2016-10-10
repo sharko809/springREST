@@ -1,11 +1,18 @@
 package com.serviceapp.entity;
 
+import com.serviceapp.validation.annotation.ValidUserTransferObjectPassword;
+import com.serviceapp.validation.marker.AccountValidation;
+import com.serviceapp.validation.marker.CreateUserValidation;
+import com.serviceapp.validation.marker.RegistrationValidation;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 /**
  * Class representing <code>User</code> entity.
@@ -24,6 +31,9 @@ public class User {
     /**
      * Username used to display in UI
      */
+    @NotNull
+    @Size(min = 3, max = 20, message = "{username.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яё0-9]+([ '-][a-zA-Zа-яА-Яё0-9]+)*", message = "{username.pattern}")
     @Column(name = "username")
     private String name;
 
@@ -31,12 +41,17 @@ public class User {
      * Login is used to log in the service.
      * Only visible to admin.
      */
+    @NotNull
+    @Size(min = 3, max = 60, message = "{login.size}")
+    @Pattern(regexp = "^[_A-Za-z0-9-+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
+            message = "{login.pattern}")
     @Column(name = "login")
     private String login;
 
     /**
      * User password to access service.
      */
+    @NotNull
     @Column(name = "password")
     private String password;
 

@@ -1,29 +1,29 @@
 package com.serviceapp.entity.dto;
 
-import java.sql.Date;
+import javax.validation.constraints.*;
 
 /**
  * Helper class used as DTO for reviews.
  */
 public class ReviewTransferObject {
 
+    @NotNull
+    @Size(min = 3, max = 100, message = "{review.title.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яё0-9.,]+([ '-][a-zA-Zа-яА-Яё0-9.,]+)*", message = "{review.title.pattern}")
     private String title;
 
+    @NotNull
+    @Min(value = 1, message = "{review.rating.min}")
+    @Max(value = 10, message = "{review.rating.max}")
     private Integer rating;
 
+    @NotNull
+    @Size(min = 5, max = 2000, message = "{review.reviewText.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яё0-9@()!.,+&=?:\\-\"'\\[\\]{\\}]+([ '-][a-zA-Zа-яА-Яё0-9@()!.,+&=?:\\\\\"'\\-\\[\\]{\\}]+)*",
+            message = "{review.reviewText.pattern}")
     private String text;
 
-    private Date postDate;
-
     public ReviewTransferObject() {
-    }
-
-    public Date getPostDate() {
-        return postDate;
-    }
-
-    public void setPostDate(Date postDate) {
-        this.postDate = postDate;
     }
 
     public String getTitle() {

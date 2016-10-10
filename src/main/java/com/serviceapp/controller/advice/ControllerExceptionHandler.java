@@ -23,13 +23,6 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorEntity> invalidArgument(HttpServletRequest request, Exception ex) {
         ErrorEntity errorEntity = new ErrorEntity(HttpStatus.BAD_REQUEST, "Invalid query param", ex, request);
-//        Map<String, String> errorResponse = new HashMap<>();
-//        errorResponse.put("status", "400");
-//        errorResponse.put("message", "Invalid query param");
-//        errorResponse.put("error message", ex.getMessage());
-//        if (request.getQueryString() != null) {
-//            errorResponse.put("query", request.getQueryString());
-//        }
         return new ResponseEntity<>(errorEntity, HttpStatus.BAD_REQUEST);
     }
 
@@ -42,13 +35,6 @@ public class ControllerExceptionHandler {
     public ResponseEntity<ErrorEntity> getException(HttpServletRequest request, Exception ex) {
         LOGGER.error("Class: " + ex.getClass(), ex);
         ErrorEntity errorEntity = new ErrorEntity(HttpStatus.BAD_REQUEST, "Something bad happened", ex, request);
-//        Map<String, String> errorResponse = new HashMap<>();
-//        errorResponse.put("status", "400");
-//        errorResponse.put("message", "Something bad happened...");
-//        errorResponse.put("error message", ex.getMessage());
-//        if (request.getQueryString() != null) {
-//            errorResponse.put("query", request.getQueryString());
-//        }
         return new ResponseEntity<>(errorEntity, HttpStatus.BAD_REQUEST);
     }
 

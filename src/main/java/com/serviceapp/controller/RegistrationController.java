@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +47,7 @@ public class RegistrationController {
      */
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity register(@Validated({Default.class, RegistrationValidation.class})
-                                   @RequestBody(required = false) UserTransferObject user, Errors errors) {
+                                   @RequestBody(required = false) UserTransferObject user, BindingResult errors) {
         if (user == null) {
             ErrorEntity error = new ErrorEntity(HttpStatus.UNPROCESSABLE_ENTITY, "No user info detected");
             return new ResponseEntity<>(error, error.getStatus());
