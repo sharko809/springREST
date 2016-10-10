@@ -96,6 +96,16 @@ public class UserService {
     }
 
     /**
+     * Returns whether an entity of type <code>User</code> with the given id exists.
+     *
+     * @param id id of <code>User</code> to check. Must not be <code>null</code>, otherwise returns <code>false</code>
+     * @return <code>true</code> if an entity with the given id exists, <code>false</code> otherwise
+     */
+    public Boolean ifUserExists(Long id) {
+        return id != null && userRepository.exists(id);
+    }
+
+    /**
      * Get user with provided login in database
      *
      * @param login login of user to find. Must not be <code>null</code>

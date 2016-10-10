@@ -57,6 +57,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
     void delete(User user);
 
     /**
+     * Checks whether an entity of type <code>User</code> with the given id exists.
+     *
+     * @param id id of <code>User</code> to check. Must not be <code>null</code>.
+     * @return <code>true</code> if an entity with the given id exists, <code>false</code> otherwise
+     * @throws IllegalArgumentException thrown if <code>id</code> is <code>null</code>
+     */
+    @Override
+    boolean exists(Long id);
+
+    /**
      * Returns all instances of the <code>User</code> type.
      *
      * @return all <code>User</code> instances

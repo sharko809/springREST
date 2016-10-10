@@ -1,9 +1,5 @@
 package com.serviceapp.entity;
 
-import com.serviceapp.validation.annotation.ValidUserTransferObjectPassword;
-import com.serviceapp.validation.marker.AccountValidation;
-import com.serviceapp.validation.marker.CreateUserValidation;
-import com.serviceapp.validation.marker.RegistrationValidation;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;

@@ -27,4 +27,9 @@ public class EntityConverterTest {
         assertNull(EntityConverter.dtoToReview(null));
     }
 
+    @Test
+    public void userToDtoShort() throws Exception {
+        assertNull(EntityConverter.userToDtoShort(null));
+    }
+
 }

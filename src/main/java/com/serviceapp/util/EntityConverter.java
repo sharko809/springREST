@@ -3,6 +3,7 @@ package com.serviceapp.util;
 import com.serviceapp.entity.Review;
 import com.serviceapp.entity.User;
 import com.serviceapp.entity.dto.ReviewTransferObject;
+import com.serviceapp.entity.dto.UserShortDto;
 import com.serviceapp.entity.dto.UserTransferObject;
 
 /**
@@ -50,6 +51,25 @@ public class EntityConverter {
         review.setRating(reviewTransferObject.getRating());
         review.setReviewText(reviewTransferObject.getText());
         return review;
+    }
+
+    /**
+     * Converts provided <code>User</code> to <code>UserShortDto</code> object
+     *
+     * @param user <code>User</code> to convert to <code>UserShortDto</code>
+     * @return <code>UserShortDto</code> object with fields populated from provided <code>User</code>. If
+     * <code>user</code> parameter is <code>null</code> - returns <code>null</code>
+     * @see UserShortDto
+     * @see User
+     */
+    public static UserShortDto userToDtoShort(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserShortDto userTransferObject = new UserShortDto();
+        userTransferObject.setName(user.getName());
+        userTransferObject.setLogin(user.getLogin());
+        return userTransferObject;
     }
 
 }

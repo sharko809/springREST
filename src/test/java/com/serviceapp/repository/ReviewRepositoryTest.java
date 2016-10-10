@@ -9,6 +9,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import resources.TestConfiguration;
 
+import java.sql.Date;
+
 import static org.junit.Assert.*;
 
 /**
@@ -37,7 +39,9 @@ public class ReviewRepositoryTest {
         review.setMovieId(OK_ID);
         review.setUserId(OK_ID);
         review.setTitle("title");
-        review.setReviewText("text");
+        review.setReviewText("texttext");
+        review.setRating(10);
+        review.setPostDate(new Date(new java.util.Date().getTime()));
         assertNull(review.getId());
         Review saved = reviewRepository.saveAndFlush(review);
         assertNotNull(saved.getId());

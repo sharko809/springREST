@@ -49,6 +49,19 @@ public class UserServiceTest {
     }
 
     @Test
+    public void ifUserExists() throws Exception {
+        assertTrue(userService.ifUserExists(OK_ID));
+        assertFalse(userService.ifUserExists(NEGATIVE_ID));
+        assertFalse(userService.ifUserExists(ZERO_ID));
+    }
+
+    @Test
+    public void ifUserExistsNullClause() throws Exception {
+        // null value treated in a way that results in false
+        assertFalse(userService.ifUserExists(NULL_LONG));
+    }
+
+    @Test
     public void getAllUsers() throws Exception {
         assertNotNull(userService.getAllUsers());
         assertTrue(userService.getAllUsers().size() > 5);

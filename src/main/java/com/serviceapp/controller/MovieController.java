@@ -57,15 +57,17 @@ public class MovieController {
         }
         Movie movie = movieService.getMovie(id);
         if (movie == null) {
-            return new ResponseEntity<>("Unable to get movie", HttpStatus.INTERNAL_SERVER_ERROR);
+            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to get movie");
+            return new ResponseEntity<>(error, error.getStatus());
         }
+        // TODO reviews to be added (+ users)
         return new ResponseEntity<>(movie, HttpStatus.OK);
     }
 
     /**
      * Performs review posting and accompanied functions (recalculating movie rating)
      *
-     * @param movieId      path variable - id of movie for which review is written
+     * @param id      path variable - id of movie for which review is written
      * @param reviewObject object holding review data (title, text, rating)
      * @param errors       errors generated if <code>reviewObject</code> param failed validation
      * @return status code representing the status of the operation:
@@ -75,10 +77,10 @@ public class MovieController {
      * <li><code>200</code> - if review has been created successfully</li>
      */
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public ResponseEntity postReview(@PathVariable(name = "id") Long movieId,
+    public ResponseEntity postReview(@PathVariable Long id,
                                      @Validated @RequestBody(required = false) ReviewTransferObject reviewObject,
                                      BindingResult errors) {
-        if (!movieService.ifMovieExists(movieId)) {
+        if (!movieService.ifMovieExists(id)) {
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         }
         if (errors.hasErrors()) {
@@ -93,14 +95,15 @@ public class MovieController {
         Date postDate = new Date(new java.util.Date().getTime());
 
         Review review = EntityConverter.dtoToReview(reviewObject);
-        review.setMovieId(movieId);
+        review.setMovieId(id);
         review.setUserId(currentUserId);
         review.setPostDate(postDate);
         Review createdReview = reviewService.createReview(review);
         if (createdReview == null) {
-            return new ResponseEntity<>("Review is not created", HttpStatus.INTERNAL_SERVER_ERROR);
+            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Review is not created");
+            return new ResponseEntity<>(error, error.getStatus());
         }
-        updateMovieRating(movieId, reviewObject.getRating());
+        updateMovieRating(id, reviewObject.getRating());
         return new ResponseEntity(HttpStatus.OK);
     }
 

@@ -103,4 +103,14 @@ public class ErrorEntity {
     public void setQuery(String query) {
         this.query = query;
     }
+
+    @Override
+    public String toString() {
+        return "ErrorEntity{" +
+                "status=" + status +
+                ", userMessage=" + userMessage +
+                ", errorMessage=" + errorMessage +
+                ", query='" + query + '\'' +
+                '}';
+    }
 }

@@ -8,6 +8,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class PrincipalUtil {
 
+    /**
+     * Get current user principal
+     *
+     * @return the <code>Principal</code> being authenticated or the authenticated principal after authentication.
+     */
     public static UserDetailsImpl getCurrentPrincipal() {
         return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }

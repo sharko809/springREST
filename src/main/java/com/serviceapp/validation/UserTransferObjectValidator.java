@@ -1,5 +1,6 @@
 package com.serviceapp.validation;
 
+import com.serviceapp.validation.annotation.ValidMovieTransferObjectURL;
 import com.serviceapp.validation.annotation.ValidUserTransferObjectPassword;
 
 import javax.validation.ConstraintValidator;
@@ -15,16 +16,30 @@ public class UserTransferObjectValidator implements ConstraintValidator<ValidUse
     private int min;
     private int max;
 
+    /**
+     * Initializes this validator with minimal and maximal values (if none - use defaults)
+     *
+     * @param validUserTransferObjectPassword <code>ValidUserTransferObjectPassword</code> annotation
+     * @see ValidMovieTransferObjectURL
+     */
     @Override
     public void initialize(ValidUserTransferObjectPassword validUserTransferObjectPassword) {
         this.min = validUserTransferObjectPassword.min();
         this.max = validUserTransferObjectPassword.max();
     }
 
+    /**
+     * Validates password. If password if <code>null</code> - constraint considered satisfied. Otherwise checks for
+     * password length
+     *
+     * @param password                   password to validate
+     * @param constraintValidatorContext context in which the constraint is evaluated
+     * @return <code>false</code> if <code>password</code> does not pass the constraint
+     */
     @Override
-    public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(String password, ConstraintValidatorContext constraintValidatorContext) {
 
-        return s == null || s.isEmpty() || !(s.length() < min || s.length() > max);
+        return password == null || password.isEmpty() || !(password.length() < min || password.length() > max);
 
     }
 

@@ -15,11 +15,27 @@ public class MovieTransferObjectValidator implements ConstraintValidator<ValidMo
     private int min;
     private int max;
 
+    /**
+     * Initializes this validator with minimal and maximal values (if none - use defaults)
+     *
+     * @param validMovieTransferObjectURL <code>ValidMovieTransferObjectURL</code> annotation
+     * @see ValidMovieTransferObjectURL
+     */
+    @Override
     public void initialize(ValidMovieTransferObjectURL validMovieTransferObjectURL) {
         this.min = validMovieTransferObjectURL.min();
         this.max = validMovieTransferObjectURL.max();
     }
 
+    /**
+     * Validates URL. If URL is <code>null</code> - constraint considered satisfied. Otherwise URL validation is
+     * preformed with apache validator and length check
+     *
+     * @param url                        URL to validate
+     * @param constraintValidatorContext context in which the constraint is evaluated
+     * @return <code>false</code> if <code>url</code> does not pass the constraint
+     */
+    @Override
     public boolean isValid(String url, ConstraintValidatorContext constraintValidatorContext) {
 
         UrlValidator urlValidator = new UrlValidator();

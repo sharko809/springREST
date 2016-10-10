@@ -28,6 +28,7 @@ public class UserRepositoryTest {
     private static final Long NEGATIVE_ID = -1L;
     private static final Long OK_ID = 1L;
     private static final Long ZERO_ID = 0L;
+    private static final Long MAX_VALUE = Long.MAX_VALUE;
     @Autowired
     private UserRepository userRepository;
 
@@ -35,7 +36,7 @@ public class UserRepositoryTest {
     public void saveAndFlush() throws Exception {
         User user = new User();
         user.setName("name");
-        user.setLogin("login");
+        user.setLogin("login" + new Random().nextInt() + "@gmail.com");
         user.setPassword("123");
         user.setAdmin(false);
         user.setBanned(false);
@@ -56,7 +57,7 @@ public class UserRepositoryTest {
         String oldName = existing.getName();
 
         //update name
-        existing.setName(existing.getName() + new Random().nextInt());
+        existing.setName("User" + String.valueOf(new Random().nextInt()));
 
         User updated = userRepository.saveAndFlush(existing);
         String newName = updated.getName();
@@ -86,6 +87,22 @@ public class UserRepositoryTest {
     @Test(expected = IllegalArgumentException.class)
     public void delete() throws Exception {
         userRepository.delete((User) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void existsExceptionThrow() throws Exception {
+        // must throw IllegalArgumentException with id=null
+        assertTrue(userRepository.exists(NULL_LONG));
+    }
+
+    @Test
+    public void exists() {
+        // must return true with ok id
+        assertTrue(userRepository.exists(OK_ID));
+        // must return false (no such record)
+        assertFalse(userRepository.exists(MAX_VALUE));
+        // must return false for negative id
+        assertFalse(userRepository.exists(NEGATIVE_ID));
     }
 
     @Test
