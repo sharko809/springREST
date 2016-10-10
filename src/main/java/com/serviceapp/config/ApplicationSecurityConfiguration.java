@@ -4,6 +4,7 @@ import com.serviceapp.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -50,9 +51,10 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
+                .mvcMatchers(HttpMethod.POST, "/movies/*").authenticated()
                 .antMatchers("/movies", "/toprated", "/search**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/account", "/account/**").authenticated()// TODO add "POST" method for "/movies/*"
+                .antMatchers("/account", "/account/**").authenticated()
                 .antMatchers("/").anonymous()
                 .and()
         .formLogin()

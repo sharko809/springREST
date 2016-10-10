@@ -1,21 +1,28 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: dsharko
-  Date: 10/4/2016
-  Time: 5:35 PM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <html>
   <head>
     <title>Welcome</title>
+      <%--<meta name="_csrf" content="${_csrf.token}"/>--%>
+      <!-- default header name is X-CSRF-TOKEN -->
+      <%--<meta name="_csrf_header" content="${_csrf.headerName}"/>--%>
+      <sec:csrfMetaTags/>
+      <script src="${pageContext.request.contextPath}/resources/jquery-3.1.1.min.js" type="text/javascript"></script>
+      <script src="${pageContext.request.contextPath}/resources/test.js" type="text/javascript"></script>
   </head>
   <body>
   <form method="post" action="/login">
     <input type="text" name="login" placeholder="login">
     <input type="password" name="password" placeholder="pass">
-    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+    <%--<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>--%>
     <button type="submit">Login</button>
+  </form>
+  <form method="post" action="/registration">
+      <input type="text" id="name" name="name" placeholder="name">
+      <input type="text" id="login" name="login" placeholder="login">
+      <input type="password" id="password" name="password" placeholder="pass">
+      <%--<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>--%>
+      <button id="regb" type="submit">Register</button>
   </form>
   </body>
 </html>

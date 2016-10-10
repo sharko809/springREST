@@ -18,6 +18,7 @@ import java.util.List;
  * Created by dsharko on 10/3/2016.
  */
 @RestController
+@RequestMapping("/movies")
 public class MovieController {
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -29,6 +30,12 @@ public class MovieController {
         this.movieService = movieService;
     }
 
+    @RequestMapping(method = RequestMethod.GET)
+    public Page<Movie> paged(Pageable pageable) {
+        int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();// TODO I can add sorting. Seems ok
+        return movieService.findAllPaged(new PageRequest(pageNumber, RECORDS_PER_PAGE, null));// TODO handle max page range
+    }
+
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<Movie> movie(@PathVariable(name = "id") Long id) {
         Movie movie = movieService.getMovie(id);
@@ -37,6 +44,14 @@ public class MovieController {
         }
         return new ResponseEntity<>(movie, HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.POST)
+    public ResponseEntity<Movie> postReview() {
+        // TODO post review here
+        return null;
+    }
+
+    // ********--------********
 
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<Movie> allMovies() {
@@ -57,20 +72,9 @@ public class MovieController {
         return new ResponseEntity<>("Movie " + id + " exists: " + exists, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/mov", method = RequestMethod.GET)
-    public Page<Movie> paged(Pageable pageable) {
-        return movieService.findAllPaged(pageable);
-    }
-
     @RequestMapping(value = "/top", method = RequestMethod.GET)
     public List<Movie> topRated() {
         return movieService.findTopRated();
-    }
-
-    @RequestMapping(value = "/search", method = RequestMethod.GET)
-    public Page<Movie> search(@RequestParam(name = "t", defaultValue = " ") String title, Pageable pageable) {
-        int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
-        return movieService.findMovieByTitle(title, new PageRequest(pageNumber, RECORDS_PER_PAGE, null));
     }
 
 }
