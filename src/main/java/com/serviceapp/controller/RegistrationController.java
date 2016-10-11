@@ -49,7 +49,7 @@ public class RegistrationController {
     public ResponseEntity register(@Validated({Default.class, RegistrationValidation.class})
                                    @RequestBody(required = false) UserTransferObject user, BindingResult errors) {
         if (user == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.UNPROCESSABLE_ENTITY, "No user info detected");
+            ErrorEntity error = new ErrorEntity(HttpStatus.UNPROCESSABLE_ENTITY, "No user data detected");
             return new ResponseEntity<>(error, error.getStatus());
         }
 

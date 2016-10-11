@@ -1,5 +1,6 @@
 import com.serviceapp.controller.MovieController;
 import com.serviceapp.entity.Movie;
+import com.serviceapp.entity.util.SortTypeUser;
 import com.serviceapp.repository.MovieRepository;
 import com.serviceapp.service.MovieService;
 import org.junit.Test;
@@ -71,6 +72,16 @@ public class SimpleTest {
     public void testController() {
         MovieController controller = applicationContext.getBean(MovieController.class);
         assertNotNull(controller.movie(1L));
+    }
+
+    @Test
+    public void isUserSortType() throws Exception {
+        assertTrue(SortTypeUser.isUserSortType("id"));
+        assertTrue(SortTypeUser.isUserSortType("login"));
+        assertTrue(SortTypeUser.isUserSortType("username"));
+        assertTrue(SortTypeUser.isUserSortType("isbanned"));
+        assertTrue(SortTypeUser.isUserSortType("isadmin"));
+        assertFalse(SortTypeUser.isUserSortType("awdawd"));
     }
 
 }

@@ -7,6 +7,14 @@ import com.serviceapp.entity.dto.MovieTransferObject;
 import com.serviceapp.entity.dto.ReviewTransferObject;
 import com.serviceapp.entity.dto.UserShortDto;
 import com.serviceapp.entity.dto.UserTransferObject;
+import com.serviceapp.entity.util.MovieContainer;
+import com.serviceapp.service.MovieService;
+import com.serviceapp.service.ReviewService;
+import com.serviceapp.service.UserService;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Helper class to convert DTO to entities and backwards.
@@ -85,6 +93,40 @@ public class EntityConverter {
         movieTransferObject.setRating(movie.getRating());
         movieTransferObject.setDescription(movie.getDescription());
         return movieTransferObject;
+    }
+
+    /**
+     * Helper method to get and pack movie data, users and their reviews into one single <code>MovieContainer</code>
+     * object for convenience.
+     *
+     * @param movieId id of movie for witch to retrieve data
+     * @return <code>MovieContainer</code> object with all movie-related data
+     * @see MovieContainer
+     */
+    public static MovieContainer completeMovie(Long movieId, MovieService movieService, ReviewService reviewService,
+                                         UserService userService) {
+        MovieContainer movieContainer = new MovieContainer();
+        Movie movie = movieService.getMovie(movieId);
+        MovieTransferObject movieTransferObject = EntityConverter.movieToDto(movie);
+        List<Review> reviews = reviewService.getReviewsByMovieId(movieId);
+        reviews.sort((r1, r2) -> r2.getPostDate().compareTo(r1.getPostDate()));// TODO NPE?
+        Map<Long, Object> users = new HashMap<>();
+        if (reviews.size() > 0) {
+            for (Review review : reviews) {
+                if (review != null)
+                    if (review.getUserId() != null)
+                        if (review.getUserId() > 0) {
+                            User user = userService.getUser(review.getUserId());
+                            UserShortDto userShort = EntityConverter.userToDtoShort(user);
+                            userShort.setLogin(null);
+                            users.put(review.getUserId(), userShort);
+                        }
+            }
+        }
+        movieContainer.setMovieTransferObject(movieTransferObject);
+        movieContainer.setReviews(reviews);
+        movieContainer.setUsers(users);
+        return movieContainer;
     }
 
 }

@@ -72,4 +72,16 @@ public class ReviewRepositoryTest {
         assertTrue(reviewRepository.findReviewsByMovieId(OK_ID).size() >= 1);
     }
 
+    @Test
+    public void exists() {
+        assertTrue(reviewRepository.exists(2L));
+        assertFalse(reviewRepository.exists(ZERO_ID));
+        assertFalse(reviewRepository.exists(NEGATIVE_ID));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void existsExceptionThrow()  {
+        reviewRepository.exists(NULL_LONG);
+    }
+
 }

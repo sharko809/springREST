@@ -9,7 +9,7 @@ import javax.validation.constraints.*;
 import java.sql.Date;
 
 /**
- * Class representing <code>Review</code>entity.
+ * Class representing <code>Review</code> entity.
  */
 @Entity
 public class Review {

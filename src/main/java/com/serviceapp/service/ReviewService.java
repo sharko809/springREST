@@ -2,6 +2,7 @@ package com.serviceapp.service;
 
 import com.serviceapp.entity.Review;
 import com.serviceapp.repository.ReviewRepository;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -76,6 +77,16 @@ public class ReviewService {
      */
     public List<Review> getReviewsByMovieId(Long movieId) {
         return movieId == null ? new ArrayList<>() : reviewRepository.findReviewsByMovieId(movieId);
+    }
+
+    /**
+     * Returns whether an entity of type <code>Review</code> with the given id exists.
+     *
+     * @param id id of <code>Review</code> to check. Must not be <code>null</code>, otherwise returns <code>false</code>
+     * @return <code>true</code> if an entity with the given id exists, <code>false</code> otherwise
+     */
+    public Boolean ifReviewExists(Long id) {
+        return id != null && reviewRepository.exists(id);
     }
 
 }

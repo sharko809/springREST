@@ -56,4 +56,12 @@ public class ReviewServiceTest {
         assertTrue(reviewService.getReviewsByMovieId(null).isEmpty());
     }
 
+    @Test
+    public void ifReviewExists() throws Exception {
+        assertTrue(reviewService.ifReviewExists(2L));
+        assertFalse(reviewService.ifReviewExists(NULL_LONG));
+        assertFalse(reviewService.ifReviewExists(ZERO_ID));
+        assertFalse(reviewService.ifReviewExists(NEGATIVE_ID));
+    }
+
 }
