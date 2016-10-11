@@ -8,7 +8,7 @@ import com.serviceapp.entity.util.MovieContainer;
 import com.serviceapp.service.MovieService;
 import com.serviceapp.service.ReviewService;
 import com.serviceapp.service.UserService;
-import com.serviceapp.util.EntityConverter;
+import com.serviceapp.util.EntityHelper;
 import com.serviceapp.util.PrincipalUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +24,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,7 +64,7 @@ public class MovieController {
             ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to get movie");
             return new ResponseEntity<>(error, error.getStatus());
         }
-        MovieContainer container = EntityConverter.completeMovie(id, movieService, reviewService, userService);
+        MovieContainer container = EntityHelper.completeMovie(id, movieService, reviewService, userService);
         // TODO think about refactoring movie presentation
         return new ResponseEntity<>(container, HttpStatus.OK);
     }
@@ -101,7 +100,7 @@ public class MovieController {
         Long currentUserId = PrincipalUtil.getCurrentPrincipal().getId();
         Date postDate = new Date(new java.util.Date().getTime());
 
-        Review review = EntityConverter.dtoToReview(reviewObject);
+        Review review = EntityHelper.dtoToReview(reviewObject);
         review.setMovieId(id);
         review.setUserId(currentUserId);
         review.setPostDate(postDate);
@@ -135,7 +134,7 @@ public class MovieController {
         List<Review> reviews = reviewService.getReviewsByMovieId(movieId);
 
         if (!reviews.isEmpty()) {
-            movieToUpdate.setRating(recountRating(reviews, rating));
+            movieToUpdate.setRating(EntityHelper.recountRating(reviews, rating));
             movieService.updateMovie(movieToUpdate);
         } else {
             movieToUpdate.setRating(Double.valueOf(rating));
@@ -143,29 +142,7 @@ public class MovieController {
         }
     }
 
-    /**
-     * Recounts current movie rating taking in account new rating
-     *
-     * @param reviews <code>List</code> of <code>Review</code> objects to be parsed for ratings
-     * @param rating  new rating to add to summary
-     * @return new rating value
-     */
-    private Double recountRating(List<Review> reviews, Integer rating) {
-        Double totalRating = 0d;
-        for (Review review : reviews) {
-            totalRating += review.getRating();
-        }
-        char separator = ((DecimalFormat) DecimalFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
-        DecimalFormat df = new DecimalFormat("#" + separator + "##");
-        Double newRating = (totalRating + rating) / (reviews.size() + 1);
-        Double newRatingFormatted = null;
-        try {
-            newRatingFormatted = Double.valueOf(df.format(newRating));
-        } catch (NumberFormatException e) {
-            LOGGER.error("Error parsing rating during movie rating update.", e);
-        }
-        return (newRatingFormatted != null) ? newRatingFormatted : newRating;
-    }
+
 
     // ********--------********
 

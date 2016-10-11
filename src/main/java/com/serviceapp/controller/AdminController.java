@@ -1,6 +1,7 @@
 package com.serviceapp.controller;
 
 import com.serviceapp.entity.ErrorEntity;
+import com.serviceapp.entity.Movie;
 import com.serviceapp.entity.Review;
 import com.serviceapp.entity.User;
 import com.serviceapp.entity.dto.MovieTransferObject;
@@ -11,9 +12,11 @@ import com.serviceapp.security.PasswordManager;
 import com.serviceapp.service.MovieService;
 import com.serviceapp.service.ReviewService;
 import com.serviceapp.service.UserService;
-import com.serviceapp.util.EntityConverter;
+import com.serviceapp.util.EntityHelper;
 import com.serviceapp.util.PrincipalUtil;
 import com.serviceapp.validation.marker.CreateUserValidation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
@@ -37,6 +40,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/admin")
 public class AdminController {
 
+    private static final Logger LOGGER = LogManager.getLogger();
     /**
      * Default user sorting value in users page
      */
@@ -64,7 +68,8 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/addmovie", method = RequestMethod.POST)
-    public ResponseEntity addMovie(@Validated @RequestBody MovieTransferObject movie, BindingResult errors) {
+    public ResponseEntity addMovie(@Validated @RequestBody(required = false) MovieTransferObject movie,
+                                   BindingResult errors) {
         // TODO
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -77,8 +82,33 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/managemovies", method = RequestMethod.POST)
-    public ResponseEntity updRating() {
-        // TODO
+    public ResponseEntity updRating(@RequestParam Long movieId) {
+        if (!movieService.ifMovieExists(movieId)) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Can't find movie to update rating");
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+
+        Movie movieToUpdate = movieService.getMovie(movieId);
+        if (movieToUpdate == null) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to update movie");
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+
+        List<Review> reviews = reviewService.getReviewsByMovieId(movieId);
+        if (reviews.isEmpty()) {
+            movieToUpdate.setRating(0d);
+            LOGGER.warn("No reviews found for movie " + movieToUpdate.getMovieName() + " with id "
+                    + movieToUpdate.getId() + ". So rating can't be updated. Rating set to 0.");
+        } else {
+            movieToUpdate.setRating(EntityHelper.recountRating(reviews));
+        }
+
+        Movie updated = movieService.updateMovie(movieToUpdate);
+        if (updated == null) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to update movie");
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -89,15 +119,38 @@ public class AdminController {
             return new ResponseEntity<>(error, error.getStatus());
         }
 
-        MovieContainer movieContainer = EntityConverter.completeMovie(id, movieService, reviewService, userService);
+        MovieContainer movieContainer = EntityHelper.completeMovie(id, movieService, reviewService, userService);
         return new ResponseEntity<>(movieContainer, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/managemovies/{id}", method = RequestMethod.POST)
     public ResponseEntity editMovie(@PathVariable Long id,
-                                    @Validated @RequestBody MovieTransferObject movie, BindingResult errors) {
-        // TODO
-        return new ResponseEntity<>(HttpStatus.OK);
+                                    @Validated @RequestBody(required = false) MovieTransferObject movie,
+                                    BindingResult errors) {
+        if (movie == null) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.UNPROCESSABLE_ENTITY, "No movie data detected");
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+        if (!movieService.ifMovieExists(id)) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No movie with such id found");
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+        if (errors.hasErrors()) {
+            List<String> validationErrors = errors.getFieldErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+            ErrorEntity error = new ErrorEntity(HttpStatus.BAD_REQUEST, validationErrors);
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+
+        Movie movieToUpdate = movieService.getMovie(id);
+        if (movieToUpdate == null) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Can't find movie to update");
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+        Movie updated = movieService.updateMovie(EntityHelper.updateMovieFields(movieToUpdate, movie));
+
+        return new ResponseEntity<>("Movie " + updated.getMovieName() + " updated", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/delreview", method = RequestMethod.POST)
@@ -214,7 +267,7 @@ public class AdminController {
         user.setPassword(encodedPassword);
 //            user.setAdmin(user.getAdmin()); // TODO check if it works ok
         user.setBanned(false);
-        User created = userService.createUser(EntityConverter.dtoToUser(user));
+        User created = userService.createUser(EntityHelper.dtoToUser(user));
         if (created == null) {
             ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been created");
             return new ResponseEntity<>(error, error.getStatus());

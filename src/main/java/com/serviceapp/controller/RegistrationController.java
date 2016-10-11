@@ -4,7 +4,7 @@ import com.serviceapp.entity.ErrorEntity;
 import com.serviceapp.entity.dto.UserTransferObject;
 import com.serviceapp.security.PasswordManager;
 import com.serviceapp.service.UserService;
-import com.serviceapp.util.EntityConverter;
+import com.serviceapp.util.EntityHelper;
 import com.serviceapp.validation.marker.RegistrationValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -67,7 +67,7 @@ public class RegistrationController {
             user.setPassword(encodedPassword);
             user.setAdmin(false);
             user.setBanned(false);
-            userService.createUser(EntityConverter.dtoToUser(user));
+            userService.createUser(EntityHelper.dtoToUser(user));
         } else {
             ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "User with such login already exists");
             return new ResponseEntity<>(error, error.getStatus());

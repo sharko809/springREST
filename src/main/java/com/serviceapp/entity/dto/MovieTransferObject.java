@@ -1,5 +1,9 @@
 package com.serviceapp.entity.dto;
 
+import com.serviceapp.validation.annotation.ValidDate;
+import com.serviceapp.validation.annotation.ValidMovieTransferObjectURL;
+
+import javax.validation.constraints.*;
 import java.sql.Date;
 
 /**
@@ -9,18 +13,33 @@ public class MovieTransferObject {
 
     private Long id;
 
+    @NotNull
+    @Size(min = 1, max = 100, message = "{movie.title.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яё0-9(){},.:'ßé!?üôöóâä-åøí&Åñ]+([ '-][a-zA-Zа-яА-Яё0-9(){},.:'ßé!?üôöóâä-åøí&Åñ]+)*",
+            message = "{movie.title.pattern}")
     private String movieName;
 
+    @Size(min = 1, max = 40, message = "{movie.director.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яёöá(){},.:'ßé!?üôóâäåøíÅñ]+([ '-][a-zA-Zа-яА-Яöáё(){},.:'ßé!?üôóâäåøíÅñ]+)*",
+            message = "{movie.director.pattern}")
     private String director;
 
+    @ValidDate
     private Date releaseDate;
 
+    @ValidMovieTransferObjectURL(min = 7, max = 255)
     private String posterURL;
 
+    @ValidMovieTransferObjectURL(min = 7, max = 255)
     private String trailerURL;
 
+    @Min(value = 0)
+    @Max(value = 10)
     private Double rating;
 
+    @NotNull
+    @Size(min = 5, max = 2000, message = "{movie.description.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яё0-9@()!.,+&=?:\\-\\\\\"']+([ '-][a-zA-Zа-яА-Яё0-9@()!.,+&=?:\\\\\"'\\-]+)*")
     private String description;
 
     public MovieTransferObject() {

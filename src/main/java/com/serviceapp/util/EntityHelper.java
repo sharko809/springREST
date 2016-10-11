@@ -11,7 +11,10 @@ import com.serviceapp.entity.util.MovieContainer;
 import com.serviceapp.service.MovieService;
 import com.serviceapp.service.ReviewService;
 import com.serviceapp.service.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +22,9 @@ import java.util.Map;
 /**
  * Helper class to convert DTO to entities and backwards.
  */
-public class EntityConverter {
+public class EntityHelper {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * Converts provided <code>UserTransferObject</code> to <code>User</code> object
@@ -107,7 +112,7 @@ public class EntityConverter {
                                          UserService userService) {
         MovieContainer movieContainer = new MovieContainer();
         Movie movie = movieService.getMovie(movieId);
-        MovieTransferObject movieTransferObject = EntityConverter.movieToDto(movie);
+        MovieTransferObject movieTransferObject = EntityHelper.movieToDto(movie);
         List<Review> reviews = reviewService.getReviewsByMovieId(movieId);
         reviews.sort((r1, r2) -> r2.getPostDate().compareTo(r1.getPostDate()));// TODO NPE?
         Map<Long, Object> users = new HashMap<>();
@@ -117,7 +122,7 @@ public class EntityConverter {
                     if (review.getUserId() != null)
                         if (review.getUserId() > 0) {
                             User user = userService.getUser(review.getUserId());
-                            UserShortDto userShort = EntityConverter.userToDtoShort(user);
+                            UserShortDto userShort = EntityHelper.userToDtoShort(user);
                             userShort.setLogin(null);
                             users.put(review.getUserId(), userShort);
                         }
@@ -128,5 +133,71 @@ public class EntityConverter {
         movieContainer.setUsers(users);
         return movieContainer;
     }
+
+    /**
+     * Populates given movie object with new data from updated movie transfer object
+     *
+     * @param movieToUpdate movie to be updated
+     * @param updatedMovie  updated movie info (movie transfer object)
+     * @return <code>Movie</code> object with data populated from updated movie transfer object
+     * @see MovieTransferObject
+     * @see Movie
+     */
+    public static Movie updateMovieFields(Movie movieToUpdate, MovieTransferObject updatedMovie) {
+        movieToUpdate.setMovieName(updatedMovie.getMovieName());
+        movieToUpdate.setDirector(updatedMovie.getDirector());
+        movieToUpdate.setReleaseDate(updatedMovie.getReleaseDate());
+        movieToUpdate.setPosterURL(updatedMovie.getPosterURL());
+        movieToUpdate.setTrailerURL(updatedMovie.getTrailerURL());
+        movieToUpdate.setDescription(updatedMovie.getDescription());
+        return movieToUpdate;
+    }
+
+    /**
+     * Recounts current movie rating taking in account new rating
+     *
+     * @param reviews <code>List</code> of <code>Review</code> objects to be parsed for ratings
+     * @param rating  new rating to add to summary
+     * @return new rating value
+     */
+    public static Double recountRating(List<Review> reviews, Integer rating) {
+        Double totalRating = 0d;
+        for (Review review : reviews) {
+            totalRating += review.getRating();
+        }
+        char separator = ((DecimalFormat) DecimalFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
+        DecimalFormat df = new DecimalFormat("#" + separator + "##");
+        Double newRating = (totalRating + rating) / (reviews.size() + 1);
+        Double newRatingFormatted = null;
+        try {
+            newRatingFormatted = Double.valueOf(df.format(newRating));
+        } catch (NumberFormatException e) {
+            LOGGER.error("Error parsing rating during movie rating update.", e);
+        }
+        return (newRatingFormatted != null) ? newRatingFormatted : newRating;
+    }
+
+    /**
+     * Recounts current movie rating based on review ratings
+     *
+     * @param reviews <code>List</code> of <code>Review</code> objects to be parsed for ratings
+     * @return recalculated rating value as <code>Double</code>
+     */
+    public static Double recountRating(List<Review> reviews) {
+        Double totalRating = 0d;
+        for (Review review : reviews) {
+            totalRating += review.getRating();
+        }
+        char separator = ((DecimalFormat) DecimalFormat.getInstance()).getDecimalFormatSymbols().getDecimalSeparator();
+        DecimalFormat df = new DecimalFormat("#" + separator + "##");
+        Double newRating = totalRating / reviews.size();
+        try {
+            newRating = Double.valueOf(df.format(newRating));
+        } catch (NumberFormatException e) {
+            LOGGER.error("Error parsing rating during movie rating update.", e);
+        }
+        return newRating;
+    }
+
 
 }

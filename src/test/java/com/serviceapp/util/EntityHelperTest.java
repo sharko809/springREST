@@ -15,21 +15,21 @@ import static org.junit.Assert.assertNull;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(classes = TestConfiguration.class)
-public class EntityConverterTest {
+public class EntityHelperTest {
 
     @Test
     public void dtoToUser() throws Exception {
-        assertNull(EntityConverter.dtoToUser(null));
+        assertNull(EntityHelper.dtoToUser(null));
     }
 
     @Test
     public void dtoToReview() throws Exception {
-        assertNull(EntityConverter.dtoToReview(null));
+        assertNull(EntityHelper.dtoToReview(null));
     }
 
     @Test
     public void userToDtoShort() throws Exception {
-        assertNull(EntityConverter.userToDtoShort(null));
+        assertNull(EntityHelper.userToDtoShort(null));
     }
 
 }

@@ -1,11 +1,14 @@
 package com.serviceapp.entity;
 
+import com.serviceapp.validation.annotation.ValidDate;
+import com.serviceapp.validation.annotation.ValidMovieTransferObjectURL;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.*;
 import java.sql.Date;
 
 /**
@@ -25,42 +28,57 @@ public class Movie {
     /**
      * Movie title
      */
+    @NotNull
+    @Size(min = 1, max = 100, message = "{movie.title.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яё0-9(){},.:'ßé!?üôöóâä-åøí&Åñ]+([ '-][a-zA-Zа-яА-Яё0-9(){},.:'ßé!?üôöóâä-åøí&Åñ]+)*",
+            message = "{movie.title.pattern}")
     @Column(name = "moviename")
     private String movieName;
 
     /**
      * Name of movie's director
      */
+    @Size(min = 1, max = 40, message = "{movie.director.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яёöá(){},.:'ßé!?üôóâäåøíÅñ]+([ '-][a-zA-Zа-яА-Яöáё(){},.:'ßé!?üôóâäåøíÅñ]+)*",
+            message = "{movie.director.pattern}")
     @Column(name = "director")
     private String director;
 
     /**
      * Movie release date
      */
+    @ValidDate
     @Column(name = "releasedate")
     private Date releaseDate;
 
     /**
      * URL leading to poster for the movie
      */
+    @ValidMovieTransferObjectURL(min = 7, max = 255)
     @Column(name = "posterurl")
     private String posterURL;
 
     /**
      * URL leading to embed trailer for the movie
      */
+    @ValidMovieTransferObjectURL(min = 7, max = 255)
     @Column(name = "trailerurl")
     private String trailerURL;
 
     /**
      * Movie rating calculated based on users reviews
      */
+    @Min(value = 0)
+    @Max(value = 10)
     @Column(name = "rating")
     private Double rating;
 
     /**
      * Some description for the movie
      */
+    @NotNull
+    @Size(min = 5, max = 2000, message = "{movie.description.size}")
+    @Pattern(regexp = "[a-zA-zа-яА-яё0-9@()!.,+&=?:\\-\\\\\"']+([ '-][a-zA-Zа-яА-Яё0-9@()!.,+&=?:\\\\\"'\\-]+)*")
     @Column(name = "description")
     private String description;
 

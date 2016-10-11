@@ -7,7 +7,7 @@ import com.serviceapp.entity.dto.UserTransferObject;
 import com.serviceapp.security.PasswordManager;
 import com.serviceapp.security.UserDetailsImpl;
 import com.serviceapp.service.UserService;
-import com.serviceapp.util.EntityConverter;
+import com.serviceapp.util.EntityHelper;
 import com.serviceapp.util.PrincipalUtil;
 import com.serviceapp.validation.marker.AccountValidation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class AccountController {
             ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to get user");
             return new ResponseEntity<>(error, error.getStatus());
         }
-        UserShortDto userTransferObject = EntityConverter.userToDtoShort(user);
+        UserShortDto userTransferObject = EntityHelper.userToDtoShort(user);
 
         return new ResponseEntity<>(userTransferObject, HttpStatus.OK);
     }
