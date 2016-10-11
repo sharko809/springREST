@@ -45,17 +45,4 @@ public class WebMvcConfiguration extends WebMvcConfigurerAdapter {
         return bean;
     }
 
-//    @Bean(name = "multipartResolver")
-//    public CommonsMultipartResolver getMultipartResolver() {
-//        return new CommonsMultipartResolver();
-//    }
-
-//    @Bean(name = "messageSource")
-//    public ReloadableResourceBundleMessageSource getMessageSource() {
-//        ReloadableResourceBundleMessageSource resource = new ReloadableResourceBundleMessageSource();
-//        resource.setBasename("classpath:messages");
-//        resource.setDefaultEncoding("UTF-8");
-//        return resource;
-//    }
-
 }

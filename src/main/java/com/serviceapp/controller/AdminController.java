@@ -8,6 +8,7 @@ import com.serviceapp.entity.dto.MovieTransferObject;
 import com.serviceapp.entity.dto.UserTransferObject;
 import com.serviceapp.entity.util.MovieContainer;
 import com.serviceapp.entity.util.SortTypeUser;
+import com.serviceapp.exception.OnGetNullException;
 import com.serviceapp.security.PasswordManager;
 import com.serviceapp.service.MovieService;
 import com.serviceapp.service.ReviewService;
@@ -48,11 +49,11 @@ public class AdminController {
     /**
      * User records per page
      */
-    private static final Integer U_RECORDS_PER_PAGE = 10;
+    private static final Integer USER_RECORDS_PER_PAGE = 10;
     /**
      * Movie records per page
      */
-    private static final Integer M_RECORDS_PER_PAGE = 10;
+    private static final Integer MOVIE_RECORDS_PER_PAGE = 10;
     private MovieService movieService;
     private ReviewService reviewService;
     private UserService userService;
@@ -67,20 +68,70 @@ public class AdminController {
         this.passwordManager = passwordManager;
     }
 
+    /**
+     * Create new movie
+     *
+     * @param movie  <code>MovieTransferObject</code> populated with movie data
+     * @param errors errors generated if validation failed
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if movie created successfully</li>
+     * <li>400 - if there were errors in movie data</li>
+     * <li>422 - if no object with movie data could be detected</li>
+     * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
+     */
     @RequestMapping(value = "/addmovie", method = RequestMethod.POST)
     public ResponseEntity addMovie(@Validated @RequestBody(required = false) MovieTransferObject movie,
                                    BindingResult errors) {
-        // TODO
-        return new ResponseEntity(HttpStatus.OK);
+        if (movie == null) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.UNPROCESSABLE_ENTITY, "No movie data detected");
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+        if (errors.hasErrors()) {
+            List<String> validationErrors = errors.getFieldErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+            ErrorEntity error = new ErrorEntity(HttpStatus.BAD_REQUEST, validationErrors);
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+
+        movie.setRating(0D);
+        Movie movieToAdd = EntityHelper.dtoToMovie(movie);
+        Movie added = movieService.createMovie(movieToAdd);
+        if (added == null) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to create movie");
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+
+        return new ResponseEntity<>("Movie " + added.getMovieName() + " created successfully", HttpStatus.OK);
     }
 
+    /**
+     * Get paged list of movies
+     *
+     * @param pageable <code>org.springframework.data.domain.Pageable</code> for convenient pagination and sorting
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if movies retrieved successfully. Body will be a paged movies list</li>
+     */
     @RequestMapping(value = "/managemovies", method = RequestMethod.GET)
     public ResponseEntity manageMovies(Pageable pageable) {
         int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
         return new ResponseEntity<>(
-                movieService.findAllPaged(new PageRequest(pageNumber, M_RECORDS_PER_PAGE, null)), HttpStatus.OK);
+                movieService.findAllPaged(new PageRequest(pageNumber, MOVIE_RECORDS_PER_PAGE, null)), HttpStatus.OK);
     }
 
+    /**
+     * Recalculates movie rating. Movie rating is based on user rating sent with reviews. If no reviews found for
+     * particular movie - default <code>0</code> value is set.
+     *
+     * @param movieId id of movie to recalculate rating
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if movie rating updated successfully</li>
+     * <li>404 - if no movie to update has been found</li>
+     * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
+     */
     @RequestMapping(value = "/managemovies", method = RequestMethod.POST)
     public ResponseEntity updRating(@RequestParam Long movieId) {
         if (!movieService.ifMovieExists(movieId)) {
@@ -112,26 +163,55 @@ public class AdminController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/managemovies/{id}", method = RequestMethod.GET)
-    public ResponseEntity movieToEdit(@PathVariable Long id) {
-        if (!movieService.ifMovieExists(id)) {
+    /**
+     * Get movie data
+     *
+     * @param movieId id of movie to get
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * <li>200 - if movie retrieved successfully</li>
+     * <li>404 - if no movie has been found</li>
+     */
+    @RequestMapping(value = "/managemovies/{movieId}", method = RequestMethod.GET)
+    public ResponseEntity movieToEdit(@PathVariable Long movieId) {
+        if (!movieService.ifMovieExists(movieId)) {
             ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No such movie found");
             return new ResponseEntity<>(error, error.getStatus());
         }
 
-        MovieContainer movieContainer = EntityHelper.completeMovie(id, movieService, reviewService, userService);
+        MovieContainer movieContainer;
+        try {
+            movieContainer = EntityHelper.completeMovie(movieId, movieService, reviewService, userService);
+        } catch (OnGetNullException e) {
+            LOGGER.error("Unable to get movie", e);
+            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return new ResponseEntity<>(error, error.getStatus());
+        }
         return new ResponseEntity<>(movieContainer, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/managemovies/{id}", method = RequestMethod.POST)
-    public ResponseEntity editMovie(@PathVariable Long id,
+    /**
+     * Updated movie data
+     *
+     * @param movieId id of movie to update
+     * @param movie   <code>MovieTransferObject</code> populated with movie data
+     * @param errors  errors generated if validation failed
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if movie updated successfully</li>
+     * <li>400 - if there were errors in movie data</li>
+     * <li>404 - if no movie to update has been found</li>
+     * <li>422 - if no object with user data could be detected</li>
+     * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
+     */
+    @RequestMapping(value = "/managemovies/{movieId}", method = RequestMethod.POST)
+    public ResponseEntity editMovie(@PathVariable Long movieId,
                                     @Validated @RequestBody(required = false) MovieTransferObject movie,
                                     BindingResult errors) {
         if (movie == null) {
             ErrorEntity error = new ErrorEntity(HttpStatus.UNPROCESSABLE_ENTITY, "No movie data detected");
             return new ResponseEntity<>(error, error.getStatus());
         }
-        if (!movieService.ifMovieExists(id)) {
+        if (!movieService.ifMovieExists(movieId)) {
             ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No movie with such id found");
             return new ResponseEntity<>(error, error.getStatus());
         }
@@ -143,7 +223,7 @@ public class AdminController {
             return new ResponseEntity<>(error, error.getStatus());
         }
 
-        Movie movieToUpdate = movieService.getMovie(id);
+        Movie movieToUpdate = movieService.getMovie(movieId);
         if (movieToUpdate == null) {
             ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Can't find movie to update");
             return new ResponseEntity<>(error, error.getStatus());
@@ -153,14 +233,24 @@ public class AdminController {
         return new ResponseEntity<>("Movie " + updated.getMovieName() + " updated", HttpStatus.OK);
     }
 
+    /**
+     * Deletes review
+     *
+     * @param reviewId id of review to delete
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if review deleted successfully</li>
+     * <li>404 - if no review found with provided id</li>
+     * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
+     */
     @RequestMapping(value = "/delreview", method = RequestMethod.POST)
-    public ResponseEntity deleteReview(@RequestParam Long id) {
-        if (!reviewService.ifReviewExists(id)) {
+    public ResponseEntity deleteReview(@RequestParam Long reviewId) {
+        if (!reviewService.ifReviewExists(reviewId)) {
             ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No review to delete found");
             return new ResponseEntity<>(error, error.getStatus());
         }
 
-        Review reviewToDelete = reviewService.getReview(id);
+        Review reviewToDelete = reviewService.getReview(reviewId);
         if (reviewToDelete == null) {
             ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "No review to delete found");
             return new ResponseEntity<>(error, error.getStatus());
@@ -170,6 +260,13 @@ public class AdminController {
         return new ResponseEntity<>("Review deleted", HttpStatus.OK);
     }
 
+    /**
+     * Get paged users list
+     *
+     * @param pageable <code>org.springframework.data.domain.Pageable</code> for convenient pagination and sorting
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * <li>200 - if users retrieved successfully. Body will be a pageable users list</li>
+     */
     @RequestMapping(value = "/users", method = RequestMethod.GET)
     public ResponseEntity users(Pageable pageable) {
         int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
@@ -184,11 +281,22 @@ public class AdminController {
             }
         }
 
-        Page<User> users = userService.getAllUsersPaged(new PageRequest(pageNumber, U_RECORDS_PER_PAGE, sort));
+        Page<User> users = userService.getAllUsersPaged(new PageRequest(pageNumber, USER_RECORDS_PER_PAGE, sort));
         users.forEach(user -> user.setPassword(null));
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    /**
+     * Make user admin (grant admin authorities)
+     *
+     * @param userId id of user to make admin
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if user became admin successfully</li>
+     * <li>404 - if no user found with provided id</li>
+     * <li>409 - if attempted to change own admin state</li>
+     * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
+     */
     @RequestMapping(value = "/adminize", method = RequestMethod.POST)
     public ResponseEntity makeAdmin(@RequestParam Long userId) {
         if (!userService.ifUserExists(userId)) {
@@ -216,6 +324,17 @@ public class AdminController {
         return new ResponseEntity<>("User " + updated.getLogin() + " is admin now", HttpStatus.OK);
     }
 
+    /**
+     * Ban user
+     *
+     * @param userId id of user to ban
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if user banned successfully</li>
+     * <li>404 - if no user found with provided id</li>
+     * <li>409 - if attempted to ban yourself</li>
+     * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
+     */
     @RequestMapping(value = "/ban", method = RequestMethod.POST)
     public ResponseEntity banUser(@RequestParam Long userId) {
         if (!userService.ifUserExists(userId)) {
@@ -243,6 +362,19 @@ public class AdminController {
         return new ResponseEntity<>("User " + updated.getLogin() + " banned", HttpStatus.OK);
     }
 
+    /**
+     * Create new user
+     *
+     * @param user   <code>UserTransferObject</code> populated with user data
+     * @param errors errors generated if validation failed
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if user created</li>
+     * <li>400 - if there were errors in user data</li>
+     * <li>409 - if attempted to create user with existing login</li>
+     * <li>422 - if no object with user data could be detected</li>
+     * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
+     */
     @RequestMapping(value = "/newuser", method = RequestMethod.POST)
     public ResponseEntity addNewUser(@Validated({Default.class, CreateUserValidation.class})
                                      @RequestBody(required = false) UserTransferObject user, BindingResult errors) {

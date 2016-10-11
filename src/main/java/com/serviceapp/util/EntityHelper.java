@@ -8,6 +8,7 @@ import com.serviceapp.entity.dto.ReviewTransferObject;
 import com.serviceapp.entity.dto.UserShortDto;
 import com.serviceapp.entity.dto.UserTransferObject;
 import com.serviceapp.entity.util.MovieContainer;
+import com.serviceapp.exception.OnGetNullException;
 import com.serviceapp.service.MovieService;
 import com.serviceapp.service.ReviewService;
 import com.serviceapp.service.UserService;
@@ -69,6 +70,28 @@ public class EntityHelper {
     }
 
     /**
+     * Converts provided <code>MovieTransferObject</code> to <code>Movie</code> object
+     *
+     * @param movieTransferObject <code>MovieTransferObject</code> to convert to <code>Movie</code>
+     * @return <code>Movie</code> object with fields populated from provided <code>MovieTransferObject</code>. If
+     * <code>movieTransferObject</code> parameter is <code>null</code> - returns <code>null</code>
+     * @see MovieTransferObject
+     * @see Movie
+     */
+    public static Movie dtoToMovie(MovieTransferObject movieTransferObject) {
+        Movie movie = new Movie();
+        movie.setId(movieTransferObject.getId());
+        movie.setMovieName(movieTransferObject.getMovieName());
+        movie.setDirector(movieTransferObject.getDirector());
+        movie.setReleaseDate(movieTransferObject.getReleaseDate());
+        movie.setRating(movieTransferObject.getRating());
+        movie.setPosterURL(movieTransferObject.getPosterURL());
+        movie.setTrailerURL(movieTransferObject.getTrailerURL());
+        movie.setDescription(movieTransferObject.getDescription());
+        return movie;
+    }
+
+    /**
      * Converts provided <code>User</code> to <code>UserShortDto</code> object
      *
      * @param user <code>User</code> to convert to <code>UserShortDto</code>
@@ -87,6 +110,15 @@ public class EntityHelper {
         return userTransferObject;
     }
 
+    /**
+     * Converts provided <code>Movie</code> to <code>MovieTransferObject</code> object
+     *
+     * @param movie <code>Movie</code> to convert to <code>MovieTransferObject</code>
+     * @return <code>MovieTransferObject</code> object with fields populated from provided <code>Movie</code>. If
+     * <code>movie</code> parameter is <code>null</code> - returns <code>null</code>
+     * @see MovieTransferObject
+     * @see Movie
+     */
     public static MovieTransferObject movieToDto(Movie movie) {
         MovieTransferObject movieTransferObject = new MovieTransferObject();
         movieTransferObject.setId(movie.getId());
@@ -109,9 +141,12 @@ public class EntityHelper {
      * @see MovieContainer
      */
     public static MovieContainer completeMovie(Long movieId, MovieService movieService, ReviewService reviewService,
-                                         UserService userService) {
+                                               UserService userService) throws OnGetNullException {
         MovieContainer movieContainer = new MovieContainer();
         Movie movie = movieService.getMovie(movieId);
+        if (movie == null) {
+            throw new OnGetNullException("Unable to get movie");
+        }
         MovieTransferObject movieTransferObject = EntityHelper.movieToDto(movie);
         List<Review> reviews = reviewService.getReviewsByMovieId(movieId);
         reviews.sort((r1, r2) -> r2.getPostDate().compareTo(r1.getPostDate()));// TODO NPE?
@@ -122,6 +157,9 @@ public class EntityHelper {
                     if (review.getUserId() != null)
                         if (review.getUserId() > 0) {
                             User user = userService.getUser(review.getUserId());
+                            if (user == null) {
+                                throw new OnGetNullException("Unable to get user");
+                            }
                             UserShortDto userShort = EntityHelper.userToDtoShort(user);
                             userShort.setLogin(null);
                             users.put(review.getUserId(), userShort);

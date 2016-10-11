@@ -5,6 +5,7 @@ import com.serviceapp.entity.Movie;
 import com.serviceapp.entity.Review;
 import com.serviceapp.entity.dto.ReviewTransferObject;
 import com.serviceapp.entity.util.MovieContainer;
+import com.serviceapp.exception.OnGetNullException;
 import com.serviceapp.service.MovieService;
 import com.serviceapp.service.ReviewService;
 import com.serviceapp.service.UserService;
@@ -47,24 +48,45 @@ public class MovieController {
         this.userService = userService;
     }
 
+    /**
+     * Get paged list of movies
+     *
+     * @param pageable <code>org.springframework.data.domain.Pageable</code> for convenient pagination and sorting
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if movies retrieved successfully. Body will be a paged movies list</li>
+     */
     @RequestMapping(method = RequestMethod.GET)
     public Page<Movie> paged(Pageable pageable) {
         int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();// TODO I can add sorting. Seems ok
         return movieService.findAllPaged(new PageRequest(pageNumber, RECORDS_PER_PAGE, null));// TODO handle max page range
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ResponseEntity movie(@PathVariable(name = "id") Long id) {
-        if (!movieService.ifMovieExists(id)) {
+    /**
+     * Get movie data
+     *
+     * @param movieId id of movie to get
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * <li>200 - if movie retrieved successfully</li>
+     * <li>404 - if no movie has been found</li>
+     * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
+     */
+    @RequestMapping(value = "/{movieId}", method = RequestMethod.GET)
+    public ResponseEntity movie(@PathVariable(name = "id") Long movieId) {
+        if (!movieService.ifMovieExists(movieId)) {
             ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No such movie found");
             return new ResponseEntity<>(error, error.getStatus());
         }
-        Movie movie = movieService.getMovie(id);
-        if (movie == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to get movie");
+
+        MovieContainer container;
+        try {
+            container = EntityHelper.completeMovie(movieId, movieService, reviewService, userService);
+        } catch (OnGetNullException e) {
+            LOGGER.error("Unable to get movie", e);
+            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR,
+                    e.getMessage() + " Some internal problems occurred");
             return new ResponseEntity<>(error, error.getStatus());
         }
-        MovieContainer container = EntityHelper.completeMovie(id, movieService, reviewService, userService);
         // TODO think about refactoring movie presentation
         return new ResponseEntity<>(container, HttpStatus.OK);
     }
@@ -72,7 +94,7 @@ public class MovieController {
     /**
      * Performs review posting and accompanied functions (recalculating movie rating)
      *
-     * @param id      path variable - id of movie for which review is written
+     * @param id           path variable - id of movie for which review is written
      * @param reviewObject object holding review data (title, text, rating)
      * @param errors       errors generated if <code>reviewObject</code> param failed validation
      * @return status code representing the status of the operation:
@@ -140,29 +162,6 @@ public class MovieController {
             movieToUpdate.setRating(Double.valueOf(rating));
             movieService.updateMovie(movieToUpdate);
         }
-    }
-
-
-
-    // ********--------********
-
-    @RequestMapping(value = "/all", method = RequestMethod.GET)
-    public List<Movie> allMovies() {
-        return movieService.getAllMovies();
-    }
-
-    @RequestMapping(value = "/count", method = RequestMethod.GET)
-    public Long countMovies() {
-        return movieService.countMovies();
-    }
-
-    @RequestMapping(value = "/ex", method = RequestMethod.GET)
-    public ResponseEntity<String> ifMovieExists(@RequestParam(name = "id", defaultValue = "1") Long id) {
-        if (id < 1) {
-            return new ResponseEntity<>("Illegal id value", HttpStatus.BAD_REQUEST);
-        }
-        Boolean exists = movieService.ifMovieExists(id);
-        return new ResponseEntity<>("Movie " + id + " exists: " + exists, HttpStatus.OK);
     }
 
 }

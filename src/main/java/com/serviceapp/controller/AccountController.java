@@ -42,6 +42,17 @@ public class AccountController {
         this.passwordManager = passwordManager;
     }
 
+    /**
+     * Access user account info
+     *
+     * @param userId id of user which account is accessed
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if user account data acquired successfully</li>
+     * <li>400 - if user id is invalid</li>
+     * <li>403 - if user attempts to access another users account</li>
+     * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
+     */
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity account(@RequestParam(value = "id", defaultValue = "0") Long userId) {
         Long currentUserId = PrincipalUtil.getCurrentPrincipal().getId();
@@ -63,6 +74,18 @@ public class AccountController {
         return new ResponseEntity<>(userTransferObject, HttpStatus.OK);
     }
 
+    /**
+     * Updates user account info. If user left password field empty it would mean the password remains the same
+     *
+     * @param user   <code>UserTransferObject</code> populated with user data to update
+     * @param errors errors generated if user data validation failed
+     * @return <code>ResponseEntity</code> with content (body and http status) depending on events occurred.
+     * Status codes:
+     * <li>200 - if user account data updated successfully</li>
+     * <li>400 - if there were errors in user data</li>
+     * <li>403 - if trying to change login to already existing one</li>
+     * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
+     */
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity updateAccount(@Validated({Default.class, AccountValidation.class})
                                         @RequestBody UserTransferObject user, BindingResult errors) {

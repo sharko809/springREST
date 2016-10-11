@@ -55,7 +55,7 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .antMatchers("/movies", "/top", "/search**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/account", "/account/**").authenticated()
-//                .antMatchers("/").anonymous()
+                .antMatchers("/").anonymous()
                 .and()
         .formLogin()
                 .loginPage("/")
