@@ -1,7 +1,9 @@
 package com.serviceapp.util;
 
+import com.serviceapp.entity.Movie;
 import com.serviceapp.entity.Review;
 import com.serviceapp.entity.User;
+import com.serviceapp.entity.dto.MovieTransferObject;
 import com.serviceapp.entity.dto.ReviewTransferObject;
 import com.serviceapp.entity.dto.UserShortDto;
 import com.serviceapp.entity.dto.UserTransferObject;
@@ -70,6 +72,19 @@ public class EntityConverter {
         userTransferObject.setName(user.getName());
         userTransferObject.setLogin(user.getLogin());
         return userTransferObject;
+    }
+
+    public static MovieTransferObject movieToDto(Movie movie) {
+        MovieTransferObject movieTransferObject = new MovieTransferObject();
+        movieTransferObject.setId(movie.getId());
+        movieTransferObject.setMovieName(movie.getMovieName());
+        movieTransferObject.setDirector(movie.getDirector());
+        movieTransferObject.setReleaseDate(movie.getReleaseDate());
+        movieTransferObject.setTrailerURL(movie.getTrailerURL());
+        movieTransferObject.setPosterURL(movie.getPosterURL());
+        movieTransferObject.setRating(movie.getRating());
+        movieTransferObject.setDescription(movie.getDescription());
+        return movieTransferObject;
     }
 
 }

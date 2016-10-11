@@ -39,6 +39,7 @@ public class ReviewRepositoryTest {
         review.setMovieId(OK_ID);
         review.setUserId(OK_ID);
         review.setTitle("title");
+        review.setPostDate(new Date(new java.util.Date().getTime()));
         review.setReviewText("texttext");
         review.setRating(10);
         review.setPostDate(new Date(new java.util.Date().getTime()));

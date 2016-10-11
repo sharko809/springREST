@@ -52,14 +52,14 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .mvcMatchers(HttpMethod.POST, "/movies/*").authenticated()
-                .antMatchers("/movies", "/toprated", "/search**").permitAll()
+                .antMatchers("/movies", "/top", "/search**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/account", "/account/**").authenticated()
-                .antMatchers("/").anonymous()
+//                .antMatchers("/").anonymous()
                 .and()
         .formLogin()
                 .loginPage("/")
-                .loginProcessingUrl("/login").defaultSuccessUrl("/ex")// TODO add handlers
+                .loginProcessingUrl("/login").defaultSuccessUrl("/movies")// TODO add handlers
 //                .successHandler()
 //                .failureHandler()
                 .usernameParameter("login")
