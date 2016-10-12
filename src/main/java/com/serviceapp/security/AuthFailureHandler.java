@@ -1,7 +1,6 @@
 package com.serviceapp.security;
 
 import com.serviceapp.entity.ErrorEntity;
-import com.serviceapp.entity.dto.UserTransferObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -9,8 +8,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -71,14 +68,6 @@ public class AuthFailureHandler implements AuthenticationFailureHandler {
             writer.write(new ErrorEntity(HttpStatus.BAD_REQUEST, "Login failed", exception).toJsonString());
         }
 
-    }
-
-    //TODO try it
-    private BindingResult val(@Validated UserTransferObject user, BindingResult errors) {
-        if (errors.hasErrors()) {
-            return errors;
-        }
-        return null;
     }
 
     /**
