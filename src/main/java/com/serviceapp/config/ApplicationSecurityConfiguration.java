@@ -1,5 +1,6 @@
 package com.serviceapp.config;
 
+import com.serviceapp.security.AccessDeniedHandler;
 import com.serviceapp.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -38,6 +39,11 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
         return provider;
     }
 
+    @Bean
+    public org.springframework.security.web.access.AccessDeniedHandler accessDeniedHandler() {
+        return new AccessDeniedHandler();
+    }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authenticationProvider());
@@ -55,7 +61,12 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .antMatchers("/movies", "/top", "/search**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/account", "/account/**").authenticated()
-                .antMatchers("/").anonymous()
+                .mvcMatchers(HttpMethod.POST, "/").anonymous()
+                .mvcMatchers(HttpMethod.GET, "/").anonymous()
+                .mvcMatchers(HttpMethod.POST, "/login").anonymous()
+                .mvcMatchers(HttpMethod.GET, "/login").anonymous()
+                .and()
+                .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
                 .and()
         .formLogin()
                 .loginPage("/")

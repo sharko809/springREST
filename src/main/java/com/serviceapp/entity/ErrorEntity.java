@@ -121,4 +121,10 @@ public class ErrorEntity {
                 ", query='" + query + '\'' +
                 '}';
     }
+
+    public String toJsonString() {
+        return "{\"status\":\"" + status + "\", \"userMessage\":\"" + userMessage +
+                "\", \"errorMessage\":\"" + errorMessage + "\", \"query\":\"" + query + "\"}";
+    }
+
 }
