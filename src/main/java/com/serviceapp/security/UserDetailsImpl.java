@@ -6,7 +6,8 @@ import org.springframework.security.core.userdetails.User;
 import java.util.Collection;
 
 /**
- * Created by dsharko on 9/7/2016.
+ * Implementation of Spring Security userdetails <code>User</code> class. Models core user information retrieved
+ * by a <code>UserDetailsService</code>
  */
 public class UserDetailsImpl extends User {
 

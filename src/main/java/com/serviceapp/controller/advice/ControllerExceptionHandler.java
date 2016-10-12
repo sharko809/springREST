@@ -24,12 +24,15 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorEntity> invalidArgument(HttpServletRequest request, Exception ex) {
+        LOGGER.warn("Invalid url parameters detected", ex);
         ErrorEntity errorEntity = new ErrorEntity(HttpStatus.BAD_REQUEST, "Invalid url param", ex, request);
         return new ResponseEntity<>(errorEntity, errorEntity.getStatus());
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity invalidUrl(HttpServletRequest request) {
+        LOGGER.warn("Invalid url access attempt: {}",
+                request.getRequestURI() + (request.getQueryString() == null ? "" : request.getQueryString()));
         Map<String, String> error = new HashMap<>();
         error.put("message", "Requested url is not found on this resource, sorry :(");
         error.put("url", request.getRequestURI() + (request.getQueryString() == null ? "" : request.getQueryString()));
@@ -39,7 +42,7 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<ErrorEntity> getException(HttpServletRequest request, Exception ex) {
-        LOGGER.error("Class: " + ex.getClass(), ex);
+        LOGGER.error("Something bad happened", ex);
         ErrorEntity errorEntity = new ErrorEntity(HttpStatus.BAD_REQUEST, "Something bad happened", ex, request);
         return new ResponseEntity<>(errorEntity, errorEntity.getStatus());
     }

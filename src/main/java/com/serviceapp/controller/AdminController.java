@@ -397,7 +397,6 @@ public class AdminController {
         }
         String encodedPassword = passwordManager.encode(user.getPassword());
         user.setPassword(encodedPassword);
-//            user.setAdmin(user.getAdmin()); // TODO check if it works ok
         user.setBanned(false);
         User created = userService.createUser(EntityHelper.dtoToUser(user));
         if (created == null) {

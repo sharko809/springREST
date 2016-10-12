@@ -1,6 +1,7 @@
 package com.serviceapp.config;
 
 import com.serviceapp.security.AccessDeniedHandler;
+import com.serviceapp.security.AuthFailureHandler;
 import com.serviceapp.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 /**
  * Configuration for Spring Security
@@ -44,6 +46,11 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
         return new AccessDeniedHandler();
     }
 
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return new AuthFailureHandler();
+    }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authenticationProvider());
@@ -72,7 +79,7 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .loginPage("/")
                 .loginProcessingUrl("/login").defaultSuccessUrl("/movies")// TODO add handlers
 //                .successHandler()
-//                .failureHandler()
+                .failureHandler(authenticationFailureHandler())
                 .usernameParameter("login")
                 .passwordParameter("password")
                 .and()

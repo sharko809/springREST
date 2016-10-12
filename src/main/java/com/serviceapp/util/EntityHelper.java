@@ -122,7 +122,7 @@ public class EntityHelper {
      * @see MovieTransferObject
      * @see Movie
      */
-    public static MovieTransferObject movieToDto(Movie movie) {
+    private static MovieTransferObject movieToDto(Movie movie) {
         if (movie == null) {
             return null;
         }
@@ -144,6 +144,7 @@ public class EntityHelper {
      *
      * @param movieId id of movie for witch to retrieve data
      * @return <code>MovieContainer</code> object with all movie-related data
+     * @throws OnGetNullException if exception occurred reading from database
      * @see MovieContainer
      */
     public static MovieContainer completeMovie(Long movieId, MovieService movieService, ReviewService reviewService,
@@ -155,7 +156,7 @@ public class EntityHelper {
         }
         MovieTransferObject movieTransferObject = EntityHelper.movieToDto(movie);
         List<Review> reviews = reviewService.getReviewsByMovieId(movieId);
-        reviews.sort((r1, r2) -> r2.getPostDate().compareTo(r1.getPostDate()));// TODO NPE?
+        reviews.sort((r1, r2) -> r2.getPostDate().compareTo(r1.getPostDate()));
         Map<Long, Object> users = new HashMap<>();
         if (reviews.size() > 0) {
             for (Review review : reviews) {

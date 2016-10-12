@@ -23,6 +23,14 @@ public class AccessDeniedHandler implements org.springframework.security.web.acc
         clearAuthenticationAttributes(request);
     }
 
+    /**
+     * Handles access denial
+     *
+     * @param request  - that resulted in an AccessDeniedException
+     * @param response - so that the user agent can be advised of the failure
+     * @param ex       - that caused the invocation
+     * @throws IOException in the event of an IOException
+     */
     private void handleDenied(HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex)
             throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);

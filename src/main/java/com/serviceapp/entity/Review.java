@@ -2,6 +2,7 @@ package com.serviceapp.entity;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -26,12 +27,14 @@ public class Review {
      * id of user - author of review
      */
     @NotNull
+    @Column(name = "userID")
     private Long userId;
 
     /**
      * Date when review has been posted
      */
     @NotNull
+    @Column(name = "postdate")
     private Date postDate;
 
     /**
@@ -41,12 +44,14 @@ public class Review {
     @Size(min = 3, max = 100, message = "{review.title.size}")
     @Pattern(regexp = "[\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}]+([ '-][\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}]+)*",
             message = "{review.title.pattern}")
+    @Column(name = "reviewtitle")
     private String title;
 
     /**
      * id of the movie which review is written to
      */
     @NotNull
+    @Column(name = "movieID")
     private Long movieId;
 
     /**
@@ -57,6 +62,7 @@ public class Review {
     @Pattern(regexp = "[\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Sm}\\p{Ps}\\p{Pe}\\p{Pi}\\p{Pf}]" +
             "+([ '-][\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Sm}\\p{Ps}\\p{Pe}\\p{Pi}\\p{Pf}]+)*",
             message = "{review.reviewText.pattern}")
+    @Column(name = "reviewtext")
     private String reviewText;
 
     /**
@@ -65,6 +71,7 @@ public class Review {
     @NotNull
     @Min(value = 1, message = "{review.rating.min}")
     @Max(value = 10, message = "{review.rating.max}")
+    @Column(name = "rating")
     private Integer rating;
 
     public Review() {
