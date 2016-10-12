@@ -72,7 +72,7 @@ public class MovieController {
      * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
      */
     @RequestMapping(value = "/{movieId}", method = RequestMethod.GET)
-    public ResponseEntity movie(@PathVariable(name = "id") Long movieId) {
+    public ResponseEntity movie(@PathVariable Long movieId) {
         if (!movieService.ifMovieExists(movieId)) {
             ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No such movie found");
             return new ResponseEntity<>(error, error.getStatus());
@@ -131,7 +131,16 @@ public class MovieController {
             ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Review is not created");
             return new ResponseEntity<>(error, error.getStatus());
         }
-        updateMovieRating(id, reviewObject.getRating());
+        try {
+            Movie updated = updateMovieRating(id, reviewObject.getRating());
+            if (updated == null) {
+                ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Rating not updated");
+                return new ResponseEntity<>(error, error.getStatus());
+            }
+        } catch (OnGetNullException e) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Rating not updated", e);
+            return new ResponseEntity<>(error, error.getStatus());
+        }
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -150,17 +159,24 @@ public class MovieController {
      *
      * @param movieId id of movie to update rating
      * @param rating  new rating set by user
+     * @return updated <code>Movie</code> object
      */
-    private void updateMovieRating(Long movieId, Integer rating) {
-        Movie movieToUpdate = movieService.getMovie(movieId);
-        List<Review> reviews = reviewService.getReviewsByMovieId(movieId);
+    private Movie updateMovieRating(Long movieId, Integer rating) throws OnGetNullException {
+        Movie movieToUpdate;
+        List<Review> reviews;
+        try {
+            movieToUpdate = movieService.getMovie(movieId);
+            reviews = reviewService.getReviewsByMovieId(movieId);
+        } catch (Exception e) {
+            throw new OnGetNullException(e);
+        }
 
         if (!reviews.isEmpty()) {
             movieToUpdate.setRating(EntityHelper.recountRating(reviews, rating));
-            movieService.updateMovie(movieToUpdate);
+            return movieService.updateMovie(movieToUpdate);
         } else {
             movieToUpdate.setRating(Double.valueOf(rating));
-            movieService.updateMovie(movieToUpdate);
+            return movieService.updateMovie(movieToUpdate);
         }
     }
 

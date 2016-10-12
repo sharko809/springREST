@@ -16,7 +16,7 @@ public class UserTransferObject {
 
     @NotNull
     @Size(min = 3, max = 20, message = "{username.size}")
-    @Pattern(regexp = "[a-zA-zа-яА-яё0-9]+([ '-][a-zA-Zа-яА-Яё0-9]+)*", message = "{username.pattern}")
+    @Pattern(regexp = "[\\p{L}0-9]+([ '-][\\p{L}0-9]+)*", message = "{username.pattern}")
     private String name;
 
     @NotNull

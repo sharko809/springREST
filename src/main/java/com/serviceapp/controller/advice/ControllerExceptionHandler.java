@@ -11,6 +11,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Handles exceptions caught in controllers
@@ -22,20 +24,24 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorEntity> invalidArgument(HttpServletRequest request, Exception ex) {
-        ErrorEntity errorEntity = new ErrorEntity(HttpStatus.BAD_REQUEST, "Invalid query param", ex, request);
-        return new ResponseEntity<>(errorEntity, HttpStatus.BAD_REQUEST);
+        ErrorEntity errorEntity = new ErrorEntity(HttpStatus.BAD_REQUEST, "Invalid url param", ex, request);
+        return new ResponseEntity<>(errorEntity, errorEntity.getStatus());
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<String> invalidUrl() {
-        return new ResponseEntity<>("Requested url is not found on this resource, sorry :(", HttpStatus.NOT_FOUND);
+    public ResponseEntity invalidUrl(HttpServletRequest request) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", "Requested url is not found on this resource, sorry :(");
+        error.put("url", request.getRequestURI() + (request.getQueryString() == null ? "" : request.getQueryString()));
+        error.put("home", "/movies");
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<ErrorEntity> getException(HttpServletRequest request, Exception ex) {
         LOGGER.error("Class: " + ex.getClass(), ex);
         ErrorEntity errorEntity = new ErrorEntity(HttpStatus.BAD_REQUEST, "Something bad happened", ex, request);
-        return new ResponseEntity<>(errorEntity, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorEntity, errorEntity.getStatus());
     }
 
 }

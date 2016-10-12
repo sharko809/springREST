@@ -39,7 +39,8 @@ public class Review {
      */
     @NotNull
     @Size(min = 3, max = 100, message = "{review.title.size}")
-    @Pattern(regexp = "[a-zA-zа-яА-яё0-9.,]+([ '-][a-zA-Zа-яА-Яё0-9.,]+)*", message = "{review.title.pattern}")
+    @Pattern(regexp = "[\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}]+([ '-][\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}]+)*",
+            message = "{review.title.pattern}")
     private String title;
 
     /**
@@ -53,7 +54,8 @@ public class Review {
      */
     @NotNull
     @Size(min = 5, max = 2000, message = "{review.reviewText.size}")
-    @Pattern(regexp = "[a-zA-zа-яА-яё0-9@()!.,+&=?:\\-\"'\\[\\]{\\}]+([ '-][a-zA-Zа-яА-Яё0-9@()!.,+&=?:\\\\\"'\\-\\[\\]{\\}]+)*",
+    @Pattern(regexp = "[\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Sm}\\p{Ps}\\p{Pe}\\p{Pi}\\p{Pf}]" +
+            "+([ '-][\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Sm}\\p{Ps}\\p{Pe}\\p{Pi}\\p{Pf}]+)*",
             message = "{review.reviewText.pattern}")
     private String reviewText;
 

@@ -79,8 +79,8 @@ public class SimpleTest {
         assertTrue(SortTypeUser.isUserSortType("id"));
         assertTrue(SortTypeUser.isUserSortType("login"));
         assertTrue(SortTypeUser.isUserSortType("username"));
-        assertTrue(SortTypeUser.isUserSortType("isbanned"));
-        assertTrue(SortTypeUser.isUserSortType("isadmin"));
+        assertTrue(SortTypeUser.isUserSortType("banned"));
+        assertTrue(SortTypeUser.isUserSortType("admin"));
         assertFalse(SortTypeUser.isUserSortType("awdawd"));
     }
 

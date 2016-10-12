@@ -1,6 +1,7 @@
 package com.serviceapp.controller;
 
 import com.serviceapp.entity.ErrorEntity;
+import com.serviceapp.entity.User;
 import com.serviceapp.entity.dto.UserTransferObject;
 import com.serviceapp.security.PasswordManager;
 import com.serviceapp.service.UserService;
@@ -67,7 +68,11 @@ public class RegistrationController {
             user.setPassword(encodedPassword);
             user.setAdmin(false);
             user.setBanned(false);
-            userService.createUser(EntityHelper.dtoToUser(user));
+            User created = userService.createUser(EntityHelper.dtoToUser(user));
+            if (created == null) {
+                ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "User not created");
+                return new ResponseEntity<>(error, error.getStatus());
+            }
         } else {
             ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "User with such login already exists");
             return new ResponseEntity<>(error, error.getStatus());

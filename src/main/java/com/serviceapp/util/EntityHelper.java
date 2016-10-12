@@ -79,6 +79,9 @@ public class EntityHelper {
      * @see Movie
      */
     public static Movie dtoToMovie(MovieTransferObject movieTransferObject) {
+        if (movieTransferObject == null) {
+            return null;
+        }
         Movie movie = new Movie();
         movie.setId(movieTransferObject.getId());
         movie.setMovieName(movieTransferObject.getMovieName());
@@ -120,6 +123,9 @@ public class EntityHelper {
      * @see Movie
      */
     public static MovieTransferObject movieToDto(Movie movie) {
+        if (movie == null) {
+            return null;
+        }
         MovieTransferObject movieTransferObject = new MovieTransferObject();
         movieTransferObject.setId(movie.getId());
         movieTransferObject.setMovieName(movie.getMovieName());
@@ -182,6 +188,9 @@ public class EntityHelper {
      * @see Movie
      */
     public static Movie updateMovieFields(Movie movieToUpdate, MovieTransferObject updatedMovie) {
+        if (movieToUpdate == null || updatedMovie == null) {
+            return null;
+        }
         movieToUpdate.setMovieName(updatedMovie.getMovieName());
         movieToUpdate.setDirector(updatedMovie.getDirector());
         movieToUpdate.setReleaseDate(updatedMovie.getReleaseDate());
@@ -199,6 +208,9 @@ public class EntityHelper {
      * @return new rating value
      */
     public static Double recountRating(List<Review> reviews, Integer rating) {
+        if (rating == null || rating < 0) {
+            rating = 0;
+        }
         Double totalRating = 0d;
         for (Review review : reviews) {
             totalRating += review.getRating();

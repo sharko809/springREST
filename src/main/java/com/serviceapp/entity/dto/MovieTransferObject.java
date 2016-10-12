@@ -15,13 +15,11 @@ public class MovieTransferObject {
 
     @NotNull
     @Size(min = 1, max = 100, message = "{movie.title.size}")
-    @Pattern(regexp = "[a-zA-zа-яА-яё0-9(){},.:'ßé!?üôöóâä-åøí&Åñ]+([ '-][a-zA-Zа-яА-Яё0-9(){},.:'ßé!?üôöóâä-åøí&Åñ]+)*",
-            message = "{movie.title.pattern}")
+    @Pattern(regexp = "[\\p{L}\\p{Nd}(){},.:']+([ '-][\\p{L}\\p{Nd}(){},.:']+)*", message = "{movie.title.pattern}")
     private String movieName;
 
     @Size(min = 1, max = 40, message = "{movie.director.size}")
-    @Pattern(regexp = "[a-zA-zа-яА-яёöá(){},.:'ßé!?üôóâäåøíÅñ]+([ '-][a-zA-Zа-яА-Яöáё(){},.:'ßé!?üôóâäåøíÅñ]+)*",
-            message = "{movie.director.pattern}")
+    @Pattern(regexp = "[\\p{L}\\p{Nd}(){},.:']+([ '-][\\p{L}\\p{Nd}(){},.:']+)*", message = "{movie.director.pattern}")
     private String director;
 
     @ValidDate
@@ -39,7 +37,8 @@ public class MovieTransferObject {
 
     @NotNull
     @Size(min = 5, max = 2000, message = "{movie.description.size}")
-    @Pattern(regexp = "[a-zA-zа-яА-яё0-9@()!.,+&=?:\\-\\\\\"']+([ '-][a-zA-Zа-яА-Яё0-9@()!.,+&=?:\\\\\"'\\-]+)*")
+    @Pattern(regexp = "[\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Sm}\\p{Ps}\\p{Pe}\\p{Pi}\\p{Pf}]" +
+            "+([ '-][\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Sm}\\p{Ps}\\p{Pe}\\p{Pi}\\p{Pf}]+)*")
     private String description;
 
     public MovieTransferObject() {

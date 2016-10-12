@@ -48,6 +48,14 @@ public class ErrorEntity {
         this.errorMessage.add(throwable.getMessage());
     }
 
+    public ErrorEntity(HttpStatus status, String userMessage, Throwable throwable) {
+        this.status = status;
+        this.userMessage = new ArrayList<>();
+        this.userMessage.add(userMessage);
+        this.errorMessage = new ArrayList<>();
+        this.errorMessage.add(throwable.getMessage());
+    }
+
     public ErrorEntity(HttpStatus status, List<String> userMessage, Throwable throwable, HttpServletRequest request) {
         this.status = status;
         this.userMessage = userMessage;

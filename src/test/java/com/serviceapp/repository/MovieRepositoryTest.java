@@ -40,8 +40,8 @@ public class MovieRepositoryTest {
         movie.setMovieName("name");
         movie.setDirector("director");
         movie.setReleaseDate(new java.sql.Date(new java.util.Date().getTime()));
-        movie.setPosterURL("url");
-        movie.setTrailerURL("url");
+        movie.setPosterURL("https://upload.wikimedia.org/wikipedia/ru/2/21/Warcraft_poster.jpg");
+        movie.setTrailerURL("https://www.youtube.com/embed/RhFMIRuHAL4");
         movie.setRating(2d);
         movie.setDescription("description");
         assertNull(movie.getId());
@@ -56,7 +56,7 @@ public class MovieRepositoryTest {
         String oldName = existed.getMovieName();
 
         //update name
-        existed.setMovieName(existed.getMovieName() + new Random().nextInt());
+        existed.setMovieName("Movie" + new Random().nextInt());
 
         Movie updated = movieRepository.saveAndFlush(existed);
         String newName = updated.getMovieName();

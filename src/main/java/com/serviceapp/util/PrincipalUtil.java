@@ -1,7 +1,6 @@
 package com.serviceapp.util;
 
 import com.serviceapp.security.UserDetailsImpl;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
@@ -16,16 +15,6 @@ public class PrincipalUtil {
      */
     public static UserDetailsImpl getCurrentPrincipal() {
         return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
-
-    /**
-     * Obtains the currently authenticated principal, or an authentication request token.
-     *
-     * @return the <code>Authentication</code> or <code>null</code> if no authentication
-     * information is available
-     */
-    public static Authentication getAuthentication() {
-        return SecurityContextHolder.getContext().getAuthentication();
     }
 
 }
