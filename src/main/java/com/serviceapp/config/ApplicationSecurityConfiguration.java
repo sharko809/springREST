@@ -2,6 +2,7 @@ package com.serviceapp.config;
 
 import com.serviceapp.security.AccessDeniedHandler;
 import com.serviceapp.security.AuthFailureHandler;
+import com.serviceapp.security.AuthSuccessHandler;
 import com.serviceapp.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 /**
  * Configuration for Spring Security
@@ -51,6 +53,11 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
         return new AuthFailureHandler();
     }
 
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new AuthSuccessHandler();
+    }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authenticationProvider());
@@ -77,8 +84,8 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .and()
         .formLogin()
                 .loginPage("/")
-                .loginProcessingUrl("/login").defaultSuccessUrl("/movies")// TODO add handlers
-//                .successHandler()
+                .loginProcessingUrl("/login").defaultSuccessUrl("/movies")
+                .successHandler(authenticationSuccessHandler())
                 .failureHandler(authenticationFailureHandler())
                 .usernameParameter("login")
                 .passwordParameter("password")

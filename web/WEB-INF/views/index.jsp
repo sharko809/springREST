@@ -14,6 +14,7 @@
   <form method="post" action="/login">
     <input type="text" id="login" name="login" placeholder="login">
     <input type="password" id="password" name="password" placeholder="pass">
+    <input type="hidden" name="loginPage" value="loginPage"/>
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     <button id="logb" type="submit">Login</button>
   </form>
