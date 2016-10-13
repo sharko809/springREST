@@ -17,6 +17,8 @@ import java.io.IOException;
  */
 public class AccessDeniedHandler implements org.springframework.security.web.access.AccessDeniedHandler {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception)
             throws IOException, ServletException {
@@ -37,7 +39,7 @@ public class AccessDeniedHandler implements org.springframework.security.web.acc
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         String message = "Action is forbidden" +
                 ("/".equals(request.getServletPath()) ? ": authorized users can't access login page" : "");
-        new ObjectMapper().writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, message, ex));
+        OBJECT_MAPPER.writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, message, ex));
     }
 
     /**

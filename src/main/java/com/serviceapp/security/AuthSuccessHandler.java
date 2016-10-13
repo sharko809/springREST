@@ -26,6 +26,7 @@ import java.io.IOException;
 public class AuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -50,7 +51,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
             ErrorEntity error = new ErrorEntity(HttpStatus.FORBIDDEN, "You are banned");
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            new ObjectMapper().writeValue(response.getWriter(), error);
+            OBJECT_MAPPER.writeValue(response.getWriter(), error);
         }
 
         if (request.getParameter("loginPage") != null) {

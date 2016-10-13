@@ -6,7 +6,7 @@
       <%--<meta name="_csrf" content="${_csrf.token}"/>--%>
       <!-- default header name is X-CSRF-TOKEN -->
       <%--<meta name="_csrf_header" content="${_csrf.headerName}"/>--%>
-      <%--<sec:csrfMetaTags/>--%>
+      <sec:csrfMetaTags/>
       <script src="${pageContext.request.contextPath}/resources/jquery-3.1.1.min.js" type="text/javascript"></script>
       <script src="${pageContext.request.contextPath}/resources/test.js" type="text/javascript"></script>
   </head>
@@ -15,7 +15,7 @@
     <input type="text" id="login" name="login" placeholder="login">
     <input type="password" id="password" name="password" placeholder="pass">
     <input type="hidden" name="loginPage" value="loginPage"/>
-    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+    <%--<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>--%>
     <button id="logb" type="submit">Login</button>
   </form>
   <%--<form method="post" action="/registration">--%>

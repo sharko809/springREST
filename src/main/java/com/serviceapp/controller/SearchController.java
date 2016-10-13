@@ -1,11 +1,14 @@
 package com.serviceapp.controller;
 
+import com.serviceapp.entity.ErrorEntity;
 import com.serviceapp.entity.Movie;
 import com.serviceapp.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,9 +37,14 @@ public class SearchController {
      * @return <code>Page</code> of <code>Movies</code> objects if any found with specified title
      */
     @RequestMapping(method = RequestMethod.GET)
-    public Page<Movie> search(@RequestParam(name = "t", defaultValue = " ") String title, Pageable pageable) {
+    public ResponseEntity search(@RequestParam(name = "t", defaultValue = " ") String title, Pageable pageable) {
         int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
-        return movieService.findMovieByTitle(title, new PageRequest(pageNumber, RECORDS_PER_PAGE, null));
+        Page<Movie> movies = movieService.findMovieByTitle(title, new PageRequest(pageNumber, RECORDS_PER_PAGE, null));
+        if (movies.getTotalPages() - 1 < pageNumber) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+        return new ResponseEntity<>(movies, HttpStatus.OK);
     }
 
 }

@@ -117,8 +117,12 @@ public class AdminController {
     @RequestMapping(value = "/managemovies", method = RequestMethod.GET)
     public ResponseEntity manageMovies(Pageable pageable) {
         int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
-        return new ResponseEntity<>(
-                movieService.findAllPaged(new PageRequest(pageNumber, MOVIE_RECORDS_PER_PAGE, null)), HttpStatus.OK);
+        Page<Movie> movies = movieService.findAllPaged(new PageRequest(pageNumber, MOVIE_RECORDS_PER_PAGE, null));
+        if (movies.getTotalPages() - 1 < pageNumber) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+        return new ResponseEntity<>(movies, HttpStatus.OK);
     }
 
     /**
@@ -282,6 +286,10 @@ public class AdminController {
         }
 
         Page<User> users = userService.getAllUsersPaged(new PageRequest(pageNumber, USER_RECORDS_PER_PAGE, sort));
+        if (users.getTotalPages() - 1 < pageNumber) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Sorry, last page is " + (users.getTotalPages() - 1));
+            return new ResponseEntity<>(error, error.getStatus());
+        }
         users.forEach(user -> user.setPassword(null));
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -311,7 +319,7 @@ public class AdminController {
         }
         Long currentUserId = PrincipalUtil.getCurrentPrincipal().getId();
         if (currentUserId.equals(userToUpdate.getId())) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "Can't change your own admin state");// TODO code?
+            ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "Can't change your own admin state");
             return new ResponseEntity<>(error, error.getStatus());
         }
         userToUpdate.setBanned(!userToUpdate.isBanned());
@@ -344,12 +352,12 @@ public class AdminController {
 
         User userToUpdate = userService.getUser(userId);
         if (userToUpdate == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to find user to ban");
+            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to ban user");
             return new ResponseEntity<>(error, error.getStatus());
         }
         Long currentUserId = PrincipalUtil.getCurrentPrincipal().getId();
         if (currentUserId.equals(userToUpdate.getId())) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "Can't ban yourself");// TODO code?
+            ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "Can't ban yourself");
             return new ResponseEntity<>(error, error.getStatus());
         }
         userToUpdate.setAdmin(!userToUpdate.isAdmin());

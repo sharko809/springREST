@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 public class AuthFailureHandler implements AuthenticationFailureHandler {
 
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
@@ -51,7 +52,6 @@ public class AuthFailureHandler implements AuthenticationFailureHandler {
         LOGGER.debug("Failed login: " + login + ", password: " + password);
         LOGGER.trace("exception: {}", exception.getClass());
 
-
         List<String> errors = new ArrayList<>(validate(login, password));
 
         if (response.isCommitted()) {
@@ -61,13 +61,12 @@ public class AuthFailureHandler implements AuthenticationFailureHandler {
 
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         PrintWriter writer = response.getWriter();
-        ObjectMapper objectMapper = new ObjectMapper();
         if (!errors.isEmpty()) {
-            objectMapper.writeValue(writer, new ErrorEntity(HttpStatus.BAD_REQUEST, errors, exception));
+            OBJECT_MAPPER.writeValue(writer, new ErrorEntity(HttpStatus.BAD_REQUEST, errors, exception));
         } else if (exception instanceof BadCredentialsException) {
-            objectMapper.writeValue(writer, new ErrorEntity(HttpStatus.BAD_REQUEST, "Wrong password or username", exception));
+            OBJECT_MAPPER.writeValue(writer, new ErrorEntity(HttpStatus.BAD_REQUEST, "Wrong password or username", exception));
         } else {
-            objectMapper.writeValue(writer, new ErrorEntity(HttpStatus.BAD_REQUEST, "Login failed", exception));
+            OBJECT_MAPPER.writeValue(writer, new ErrorEntity(HttpStatus.BAD_REQUEST, "Login failed", exception));
         }
 
     }

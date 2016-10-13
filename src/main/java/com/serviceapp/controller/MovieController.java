@@ -57,9 +57,14 @@ public class MovieController {
      * <li>200 - if movies retrieved successfully. Body will be a paged movies list</li>
      */
     @RequestMapping(method = RequestMethod.GET)
-    public Page<Movie> paged(Pageable pageable) {
+    public ResponseEntity paged(Pageable pageable) {
         int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();// TODO I can add sorting. Seems ok
-        return movieService.findAllPaged(new PageRequest(pageNumber, RECORDS_PER_PAGE, null));// TODO handle max page range
+        Page<Movie> movies = movieService.findAllPaged(new PageRequest(pageNumber, RECORDS_PER_PAGE, null));
+        if (movies.getTotalPages() - 1 < pageNumber) {
+            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
+            return new ResponseEntity<>(error, error.getStatus());
+        }
+        return new ResponseEntity<>(movies, HttpStatus.OK);
     }
 
     /**
