@@ -122,9 +122,4 @@ public class ErrorEntity {
                 '}';
     }
 
-    public String toJsonString() {
-        return "{\"status\":\"" + status + "\", \"userMessage\":\"" + userMessage +
-                "\", \"errorMessage\":\"" + errorMessage + "\", \"query\":\"" + query + "\"}";
-    }
-
 }

@@ -1,5 +1,6 @@
 package com.serviceapp.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serviceapp.entity.ErrorEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,12 +61,13 @@ public class AuthFailureHandler implements AuthenticationFailureHandler {
 
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         PrintWriter writer = response.getWriter();
+        ObjectMapper objectMapper = new ObjectMapper();
         if (!errors.isEmpty()) {
-            writer.write(new ErrorEntity(HttpStatus.FORBIDDEN, errors, exception).toJsonString());
+            objectMapper.writeValue(writer, new ErrorEntity(HttpStatus.BAD_REQUEST, errors, exception));
         } else if (exception instanceof BadCredentialsException) {
-            writer.write(new ErrorEntity(HttpStatus.BAD_REQUEST, "Wrong password or username", exception).toJsonString());
+            objectMapper.writeValue(writer, new ErrorEntity(HttpStatus.BAD_REQUEST, "Wrong password or username", exception));
         } else {
-            writer.write(new ErrorEntity(HttpStatus.BAD_REQUEST, "Login failed", exception).toJsonString());
+            objectMapper.writeValue(writer, new ErrorEntity(HttpStatus.BAD_REQUEST, "Login failed", exception));
         }
 
     }

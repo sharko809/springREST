@@ -1,5 +1,6 @@
 package com.serviceapp.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serviceapp.entity.ErrorEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -36,7 +37,7 @@ public class AccessDeniedHandler implements org.springframework.security.web.acc
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         String message = "Action is forbidden" +
                 ("/".equals(request.getServletPath()) ? ": authorized users can't access login page" : "");
-        response.getWriter().write(new ErrorEntity(HttpStatus.FORBIDDEN, message, ex).toJsonString());
+        new ObjectMapper().writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, message, ex));
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.serviceapp.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serviceapp.entity.ErrorEntity;
 import com.serviceapp.util.PrincipalUtil;
 import org.apache.logging.log4j.LogManager;
@@ -49,7 +50,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
             ErrorEntity error = new ErrorEntity(HttpStatus.FORBIDDEN, "You are banned");
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write(error.toJsonString());
+            new ObjectMapper().writeValue(response.getWriter(), error);
         }
 
         if (request.getParameter("loginPage") != null) {

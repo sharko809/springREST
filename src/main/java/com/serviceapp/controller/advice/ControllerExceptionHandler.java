@@ -33,11 +33,9 @@ public class ControllerExceptionHandler {
     public ResponseEntity invalidUrl(HttpServletRequest request) {
         LOGGER.warn("Invalid url access attempt: {}",
                 request.getRequestURI() + (request.getQueryString() == null ? "" : request.getQueryString()));
-        Map<String, String> error = new HashMap<>();
-        error.put("message", "Requested url is not found on this resource, sorry :(");
-        error.put("url", request.getRequestURI() + (request.getQueryString() == null ? "" : request.getQueryString()));
-        error.put("home", "/movies");
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        ErrorEntity errorEntity =
+                new ErrorEntity(HttpStatus.NOT_FOUND, "Requested url is not found on this resource, sorry :(");
+        return new ResponseEntity<>(errorEntity, errorEntity.getStatus());
     }
 
     @ExceptionHandler(Throwable.class)
