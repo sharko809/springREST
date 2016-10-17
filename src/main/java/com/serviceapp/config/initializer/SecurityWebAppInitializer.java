@@ -1,7 +1,6 @@
 package com.serviceapp.config.initializer;
 
 import com.serviceapp.filter.EncodingFilter;
-import com.serviceapp.filter.LoginFilter;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 
 import javax.servlet.ServletContext;
@@ -17,11 +16,9 @@ public class SecurityWebAppInitializer extends AbstractSecurityWebApplicationIni
     protected void beforeSpringSecurityFilterChain(ServletContext servletContext) {
         super.beforeSpringSecurityFilterChain(servletContext);
         servletContext.addFilter(ENCODING_FILTER, EncodingFilter.class);
-        servletContext.addFilter("loginFiler", LoginFilter.class)
-                .addMappingForUrlPatterns(null, false, "/login");
     }
 
-/*
+    /*
     Class without overridden methods represents the same configuration as following xml
 
     <filter>

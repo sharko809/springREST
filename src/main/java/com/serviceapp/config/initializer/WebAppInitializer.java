@@ -28,12 +28,7 @@ public class WebAppInitializer implements WebApplicationInitializer {
         AnnotationConfigWebApplicationContext dispatcherServlet = new AnnotationConfigWebApplicationContext();
         dispatcherServlet.register(WebMvcConfiguration.class);
 
-        // add custom filter
-//        FilterRegistration.Dynamic loginFilter = servletContext.addFilter("loginFilter", LoginFilter.class);
-//        loginFilter.addMappingForUrlPatterns(null, false, "/login");
-
         // Register and map the dispatcher servlet
-
         DispatcherServlet newDispatcher = new DispatcherServlet(dispatcherServlet);
         newDispatcher.setThrowExceptionIfNoHandlerFound(true);
         ServletRegistration.Dynamic dispatcher = servletContext.addServlet("dispatcher", newDispatcher);

@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -17,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 /**
  * Class implements <code>AuthenticationSuccessHandler</code>. Single public overridden method
@@ -45,20 +48,33 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
      */
     private void handle(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
-
+        LOGGER.debug("AUTH SUCCESS HANDLER");
         UserDetailsImpl currentPrincipal = PrincipalUtil.getCurrentPrincipal();
         if (currentPrincipal == null || currentPrincipal.isBanned()) {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
             ErrorEntity error = new ErrorEntity(HttpStatus.FORBIDDEN, "You are banned");
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             OBJECT_MAPPER.writeValue(response.getWriter(), error);
+            return;
         }
 
-        if (request.getParameter("loginPage") != null) {
-            String redirect = makeTargetUrl(authentication);
-            LOGGER.debug("Redirecting to: {}", redirect);
-            response.sendRedirect(makeTargetUrl(authentication));
-        }
+        UserToken userToken = new UserToken();
+        userToken.setLogin(currentPrincipal.getLogin());
+        userToken.setPassword(request.getParameter("password"));
+        userToken.setBanned(currentPrincipal.isBanned());
+        boolean isAdmin = currentPrincipal.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        userToken.setAdmin(isAdmin);
+        String token = new ObjectMapper().writeValueAsString(userToken);
+
+        // encode token here
+        String encoded = Base64.getEncoder().encodeToString(token.getBytes(StandardCharsets.UTF_8));
+        LOGGER.debug("Encrypted token {}", encoded);
+        response.addHeader("SH-Rest-Token", encoded);
+//        if (request.getParameter("loginPage") != null) {
+//            String redirect = makeTargetUrl(authentication);
+//            LOGGER.debug("Redirecting to: {}", redirect);
+//            response.sendRedirect(makeTargetUrl(authentication));
+//        }
 
     }
 

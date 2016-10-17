@@ -27,7 +27,7 @@ public class TestConfiguration {
     private static final String DATABASE_USER = "root";
     private static final String DATABASE_PASSWORD = "htlbcrf";
 
-    private static final String[] ENTITY_PACKAGES = {"com.serviceapp.entity"};
+    private static final String[] ENTITY_PACKAGES = {"com.serviceapp.entity", "com.serviceapp."};
 
     private static final String HIBERNATE_DIALECT_PROP = "hibernate.dialect";
     private static final String HIBERNATE_DIALECT_VALUE = "org.hibernate.dialect.MySQLDialect";
