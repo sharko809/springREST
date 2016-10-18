@@ -136,7 +136,7 @@ public class AdminController {
      * <li>404 - if no movie to update has been found</li>
      * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
      */
-    @RequestMapping(value = "/managemovies", method = RequestMethod.POST)
+    @RequestMapping(value = "/managemovies", method = RequestMethod.PUT)
     public ResponseEntity updRating(@RequestParam Long movieId) {
         if (!movieService.ifMovieExists(movieId)) {
             ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Can't find movie to update rating");
@@ -207,7 +207,7 @@ public class AdminController {
      * <li>422 - if no object with user data could be detected</li>
      * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
      */
-    @RequestMapping(value = "/managemovies/{movieId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/managemovies/{movieId}", method = RequestMethod.PUT)
     public ResponseEntity editMovie(@PathVariable Long movieId,
                                     @Validated @RequestBody(required = false) MovieTransferObject movie,
                                     BindingResult errors) {
@@ -247,7 +247,7 @@ public class AdminController {
      * <li>404 - if no review found with provided id</li>
      * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
      */
-    @RequestMapping(value = "/delreview", method = RequestMethod.POST)
+    @RequestMapping(value = "/delreview", method = RequestMethod.DELETE)
     public ResponseEntity deleteReview(@RequestParam Long reviewId) {
         if (!reviewService.ifReviewExists(reviewId)) {
             ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No review to delete found");
@@ -305,7 +305,7 @@ public class AdminController {
      * <li>409 - if attempted to change own admin state</li>
      * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
      */
-    @RequestMapping(value = "/adminize", method = RequestMethod.POST)
+    @RequestMapping(value = "/adminize", method = RequestMethod.PUT)
     public ResponseEntity makeAdmin(@RequestParam Long userId) {
         if (!userService.ifUserExists(userId)) {
             ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No user with such id");
@@ -343,7 +343,7 @@ public class AdminController {
      * <li>409 - if attempted to ban yourself</li>
      * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
      */
-    @RequestMapping(value = "/ban", method = RequestMethod.POST)
+    @RequestMapping(value = "/ban", method = RequestMethod.PUT)
     public ResponseEntity banUser(@RequestParam Long userId) {
         if (!userService.ifUserExists(userId)) {
             ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No user with such id");

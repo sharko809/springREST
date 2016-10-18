@@ -1,6 +1,5 @@
 package com.serviceapp.config;
 
-import com.serviceapp.filter.AuthTokenFilter;
 import com.serviceapp.filter.AuthenticationTokenProcessingFilter;
 import com.serviceapp.filter.LoginFilter;
 import com.serviceapp.security.*;
@@ -98,13 +97,20 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
     }
 
     @Bean
-    public GenericFilterBean authTokenFilter() {
-        return new AuthTokenFilter();
+    public AbstractAuthenticationProcessingFilter authenticationProcessingFilterAccount() throws Exception {
+        return new AuthenticationTokenProcessingFilter("/account/**", authenticationManagerBean(), authenticationSuccessHandler());
+    }
+
+    @Bean
+    public AbstractAuthenticationProcessingFilter authenticationProcessingFilterPostReview() throws Exception {
+        return new AuthenticationTokenProcessingFilter("/movies/*/post", authenticationManagerBean(), authenticationSuccessHandler());
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        http.sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
             .authorizeRequests()
                 .mvcMatchers(HttpMethod.POST, "/movies/*").authenticated()
                 .antMatchers("/movies", "/top", "/search**").permitAll()
@@ -115,10 +121,12 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .mvcMatchers(HttpMethod.POST, "/login").anonymous()
                 .mvcMatchers(HttpMethod.GET, "/login").anonymous()
                 .and()
-                    .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
+            .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
                 .and()
-                .addFilterAfter(authenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
-        .formLogin()
+            .addFilterAfter(authenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(authenticationProcessingFilterAccount(), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(authenticationProcessingFilterPostReview(), UsernamePasswordAuthenticationFilter.class)
+            .formLogin()
                 .loginPage("/")
                 .loginProcessingUrl("/login")
                 .successHandler(authenticationSuccessHandler())
@@ -126,12 +134,13 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .usernameParameter("login")
                 .passwordParameter("password")
                 .and()
-                .logout()
-                    .logoutUrl("/logout")
-                    .logoutSuccessUrl("/")
-                    .invalidateHttpSession(true)
-                    .clearAuthentication(true)
-                .and().csrf().disable();
+            .logout()
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .and()
+            .csrf().disable();
     }
 
 }

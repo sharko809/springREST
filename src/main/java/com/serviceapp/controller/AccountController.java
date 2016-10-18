@@ -86,7 +86,7 @@ public class AccountController {
      * <li>403 - if trying to change login to already existing one</li>
      * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity updateAccount(@Validated({Default.class, AccountValidation.class})
                                         @RequestBody UserTransferObject user, BindingResult errors) {
         if (errors.hasErrors()) {
