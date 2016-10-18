@@ -7,7 +7,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -49,6 +48,11 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     private void handle(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
         LOGGER.debug("AUTH SUCCESS HANDLER");
+        if (request.getHeader("SH-Rest-Token") != null) {
+            // if user logs in for the first time to get token this method is to pass user the token.
+            // But if user is authenticated via token - don't send token again
+            return;
+        }
         UserDetailsImpl currentPrincipal = PrincipalUtil.getCurrentPrincipal();
         if (currentPrincipal == null || currentPrincipal.isBanned()) {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
@@ -70,42 +74,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         String encoded = Base64.getEncoder().encodeToString(token.getBytes(StandardCharsets.UTF_8));
         LOGGER.debug("Encrypted token {}", encoded);
         response.addHeader("SH-Rest-Token", encoded);
-//        if (request.getParameter("loginPage") != null) {
-//            String redirect = makeTargetUrl(authentication);
-//            LOGGER.debug("Redirecting to: {}", redirect);
-//            response.sendRedirect(makeTargetUrl(authentication));
-//        }
 
-    }
-
-    /**
-     * Build target URL depending on user role.
-     *
-     * @param authentication user auth details
-     * @return String redirect URL based on user role
-     */
-    private String makeTargetUrl(Authentication authentication) {
-        boolean user = false;
-        boolean admin = false;
-
-        for (GrantedAuthority authority : authentication.getAuthorities()) {
-            if ("ROLE_ADMIN".equals(authority.getAuthority())) {
-                admin = true;
-                break;
-            } else if ("ROLE_USER".equals(authority.getAuthority())) {
-                user = true;
-                break;
-            }
-        }
-
-        if (user) {
-            return "/movies";
-        } else if (admin) {
-            return "/admin";
-        } else {
-            LOGGER.warn("User with no role detected. {}", authentication.getCredentials());
-            throw new IllegalStateException("User with no role detected. " + authentication.getCredentials());
-        }
     }
 
     /**

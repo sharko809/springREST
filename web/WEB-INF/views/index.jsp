@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" session="false" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <html>
   <head>
@@ -6,7 +6,7 @@
       <%--<meta name="_csrf" content="${_csrf.token}"/>--%>
       <!-- default header name is X-CSRF-TOKEN -->
       <%--<meta name="_csrf_header" content="${_csrf.headerName}"/>--%>
-      <sec:csrfMetaTags/>
+      <%--<sec:csrfMetaTags/>--%>
       <script src="${pageContext.request.contextPath}/resources/jquery-3.1.1.min.js" type="text/javascript"></script>
       <script src="${pageContext.request.contextPath}/resources/test.js" type="text/javascript"></script>
   </head>

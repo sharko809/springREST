@@ -120,7 +120,7 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .addFilterAfter(authenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
         .formLogin()
                 .loginPage("/")
-                .loginProcessingUrl("/login").defaultSuccessUrl("/movies")
+                .loginProcessingUrl("/login")
                 .successHandler(authenticationSuccessHandler())
                 .failureHandler(authenticationFailureHandler())
                 .usernameParameter("login")
