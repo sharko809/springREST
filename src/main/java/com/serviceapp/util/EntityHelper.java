@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,6 +109,7 @@ public class EntityHelper {
             return null;
         }
         UserShortDto userTransferObject = new UserShortDto();
+        userTransferObject.setId(user.getId());
         userTransferObject.setName(user.getName());
         userTransferObject.setLogin(user.getLogin());
         return userTransferObject;
@@ -157,7 +159,7 @@ public class EntityHelper {
         MovieTransferObject movieTransferObject = EntityHelper.movieToDto(movie);
         List<Review> reviews = reviewService.getReviewsByMovieId(movieId);
         reviews.sort((r1, r2) -> r2.getPostDate().compareTo(r1.getPostDate()));
-        Map<Long, Object> users = new HashMap<>();
+        List<UserShortDto> users = new ArrayList<>();
         if (reviews.size() > 0) {
             for (Review review : reviews) {
                 if (review != null)
@@ -169,7 +171,7 @@ public class EntityHelper {
                             }
                             UserShortDto userShort = EntityHelper.userToDtoShort(user);
                             userShort.setLogin(null);
-                            users.put(review.getUserId(), userShort);
+                            users.add(userShort);
                         }
             }
         }

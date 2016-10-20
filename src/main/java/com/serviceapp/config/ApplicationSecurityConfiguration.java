@@ -40,6 +40,30 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
         this.passwordEncoder = passwordEncoder;
     }
 
+//    @Bean
+//    public AbstractAccessDecisionManager accessDecisionManager() {
+//        List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<>();
+//        decisionVoters.add(new RoleVoter());
+//        return new UnanimousBased(decisionVoters);
+//    }
+//
+//    @Bean
+//    public FilterSecurityInterceptor filterSecurityInterceptor() {
+//        FilterSecurityInterceptor interceptor = new FilterSecurityInterceptor();
+//        interceptor.setAccessDecisionManager(accessDecisionManager());
+//        LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> requestMap = new LinkedHashMap<>();
+//        List<ConfigAttribute> adminConfig = new ArrayList<>(Collections.singletonList(new SecurityConfig("ROLE_ADMIN")));
+//        List<ConfigAttribute> accountConfig = new ArrayList<>(Collections.singletonList(new SecurityConfig("ROLE_USER")));
+//        List<ConfigAttribute> postReviewConfig = new ArrayList<>(
+//                Arrays.asList(new SecurityConfig("ROLE_USER"), new SecurityConfig("ROLE_ADMIN")));
+//
+//        requestMap.put(new AntPathRequestMatcher("/admin/**"), adminConfig);
+//        requestMap.put(new AntPathRequestMatcher("/account/**"), accountConfig);
+//        requestMap.put(new AntPathRequestMatcher("/movies/*/post", HttpMethod.POST.toString()), postReviewConfig);
+//        interceptor.setSecurityMetadataSource(new DefaultFilterInvocationSecurityMetadataSource(requestMap));
+//        return interceptor;
+//    }
+
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();

@@ -9,6 +9,8 @@ import javax.validation.constraints.Size;
  */
 public class UserShortDto {
 
+    private Long id;
+
     @NotNull
     @Size(min = 3, max = 20, message = "{username.size}")
     @Pattern(regexp = "[a-zA-zа-яА-яё0-9]+([ '-][a-zA-Zа-яА-Яё0-9]+)*", message = "{username.pattern}")
@@ -21,6 +23,14 @@ public class UserShortDto {
     private String login;
 
     public UserShortDto() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {

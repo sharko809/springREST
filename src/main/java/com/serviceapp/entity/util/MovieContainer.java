@@ -2,9 +2,9 @@ package com.serviceapp.entity.util;
 
 import com.serviceapp.entity.Review;
 import com.serviceapp.entity.dto.MovieTransferObject;
+import com.serviceapp.entity.dto.UserShortDto;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Class stores all movie-related data
@@ -13,7 +13,7 @@ public class MovieContainer {
 
     private MovieTransferObject movieTransferObject;
     private List<Review> reviews;
-    private Map<Long, Object> users;
+    private List<UserShortDto> users;
 
     public MovieTransferObject getMovieTransferObject() {
         return movieTransferObject;
@@ -31,11 +31,11 @@ public class MovieContainer {
         this.reviews = reviews;
     }
 
-    public Map<Long, Object> getUsers() {
+    public List<UserShortDto> getUsers() {
         return users;
     }
 
-    public void setUsers(Map<Long, Object> users) {
+    public void setUsers(List<UserShortDto> users) {
         this.users = users;
     }
 }

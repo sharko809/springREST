@@ -14,7 +14,6 @@ public class SecurityWebAppInitializer extends AbstractSecurityWebApplicationIni
 
     @Override
     protected void beforeSpringSecurityFilterChain(ServletContext servletContext) {
-        super.beforeSpringSecurityFilterChain(servletContext);
         servletContext.addFilter(ENCODING_FILTER, EncodingFilter.class);
     }
 
