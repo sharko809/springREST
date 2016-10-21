@@ -322,7 +322,7 @@ public class AdminController {
             ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "Can't change your own admin state");
             return new ResponseEntity<>(error, error.getStatus());
         }
-        userToUpdate.setBanned(!userToUpdate.isBanned());
+        userToUpdate.setAdmin(!userToUpdate.isAdmin());
         User updated = userService.updateUser(userToUpdate);
         if (updated == null) {
             ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been updated");
@@ -360,7 +360,7 @@ public class AdminController {
             ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "Can't ban yourself");
             return new ResponseEntity<>(error, error.getStatus());
         }
-        userToUpdate.setAdmin(!userToUpdate.isAdmin());
+        userToUpdate.setBanned(!userToUpdate.isBanned());
         User updated = userService.updateUser(userToUpdate);
         if (updated == null) {
             ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been updated");
