@@ -1,8 +1,8 @@
 package com.serviceapp.controller;
 
-import com.serviceapp.entity.ErrorEntity;
 import com.serviceapp.entity.Movie;
 import com.serviceapp.service.MovieService;
+import com.serviceapp.util.ResponseErrorHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,8 +41,8 @@ public class SearchController {
         int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
         Page<Movie> movies = movieService.findMovieByTitle(title, new PageRequest(pageNumber, RECORDS_PER_PAGE, null));
         if (movies.getTotalPages() - 1 < pageNumber && movies.getTotalPages() != 0) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper
+                    .responseError(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
         }
         return new ResponseEntity<>(movies, HttpStatus.OK);
     }

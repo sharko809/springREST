@@ -1,11 +1,11 @@
 package com.serviceapp.controller;
 
-import com.serviceapp.entity.ErrorEntity;
 import com.serviceapp.entity.User;
 import com.serviceapp.entity.dto.UserTransferObject;
 import com.serviceapp.security.PasswordManager;
 import com.serviceapp.service.UserService;
 import com.serviceapp.util.EntityHelper;
+import com.serviceapp.util.ResponseErrorHelper;
 import com.serviceapp.validation.marker.RegistrationValidation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,17 +53,15 @@ public class RegistrationController {
     public ResponseEntity register(@Validated({Default.class, RegistrationValidation.class})
                                    @RequestBody(required = false) UserTransferObject user, BindingResult errors) {
         if (user == null) {
-            LOGGER.error("No user data detected in request");
-            ErrorEntity error = new ErrorEntity(HttpStatus.UNPROCESSABLE_ENTITY, "No user data detected");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.warn("No user data detected in request");
+            return ResponseErrorHelper.responseError(HttpStatus.UNPROCESSABLE_ENTITY, "No user data detected");
         }
 
         if (errors.hasErrors()) {
             List<String> validationErrors = errors.getFieldErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
-            ErrorEntity error = new ErrorEntity(HttpStatus.BAD_REQUEST, validationErrors);
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, validationErrors);
         }
 
         Boolean userNotExists = userService.getUserByLogin(user.getLogin()) == null;
@@ -74,18 +72,15 @@ public class RegistrationController {
             user.setBanned(false);
             User created = userService.createUser(EntityHelper.dtoToUser(user));
             if (created == null) {
-                LOGGER.error("User creation returned null");
-                ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "User not created");
-                return new ResponseEntity<>(error, error.getStatus());
+                LOGGER.error("User creation failed. Please, see all logs for details");
+                return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "User not created");
             }
         } else {
-            LOGGER.warn("Existing login registration attempt");
-            ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "User with such login already exists");
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.CONFLICT, "User with such login already exists");
         }
 
         LOGGER.debug("User {} created", user.getLogin());
-        String success = "User <b>" + user.getLogin() + "</b> created successfully";
+        String success = "User " + user.getLogin() + " created successfully";
         return new ResponseEntity<>(success, HttpStatus.OK);
     }
 

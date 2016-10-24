@@ -1,6 +1,7 @@
 package com.serviceapp.util;
 
 import com.serviceapp.security.UserDetailsImpl;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
@@ -14,7 +15,11 @@ public class PrincipalUtil {
      * @return the <code>Principal</code> being authenticated or the authenticated principal after authentication.
      */
     public static UserDetailsImpl getCurrentPrincipal() {
-        return (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return null;
+        }
+        return (UserDetailsImpl) authentication.getPrincipal();
     }
 
 }

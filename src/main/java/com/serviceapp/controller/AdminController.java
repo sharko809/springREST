@@ -1,6 +1,5 @@
 package com.serviceapp.controller;
 
-import com.serviceapp.entity.ErrorEntity;
 import com.serviceapp.entity.Movie;
 import com.serviceapp.entity.Review;
 import com.serviceapp.entity.User;
@@ -10,11 +9,13 @@ import com.serviceapp.entity.util.MovieContainer;
 import com.serviceapp.entity.util.SortTypeUser;
 import com.serviceapp.exception.OnGetNullException;
 import com.serviceapp.security.PasswordManager;
+import com.serviceapp.security.UserDetailsImpl;
 import com.serviceapp.service.MovieService;
 import com.serviceapp.service.ReviewService;
 import com.serviceapp.service.UserService;
 import com.serviceapp.util.EntityHelper;
 import com.serviceapp.util.PrincipalUtil;
+import com.serviceapp.util.ResponseErrorHelper;
 import com.serviceapp.validation.marker.CreateUserValidation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,23 +85,22 @@ public class AdminController {
     public ResponseEntity addMovie(@Validated @RequestBody(required = false) MovieTransferObject movie,
                                    BindingResult errors) {
         if (movie == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.UNPROCESSABLE_ENTITY, "No movie data detected");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.warn("No movie data detected in the request");
+            return ResponseErrorHelper.responseError(HttpStatus.UNPROCESSABLE_ENTITY, "No movie data detected");
         }
         if (errors.hasErrors()) {
             List<String> validationErrors = errors.getFieldErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
-            ErrorEntity error = new ErrorEntity(HttpStatus.BAD_REQUEST, validationErrors);
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, validationErrors);
         }
 
         movie.setRating(0D);
         Movie movieToAdd = EntityHelper.dtoToMovie(movie);
         Movie added = movieService.createMovie(movieToAdd);
         if (added == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to create movie");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("Unable to create movie. See all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to create movie");
         }
 
         return new ResponseEntity<>("Movie " + added.getMovieName() + " created successfully", HttpStatus.OK);
@@ -119,8 +119,8 @@ public class AdminController {
         int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
         Page<Movie> movies = movieService.findAllPaged(new PageRequest(pageNumber, MOVIE_RECORDS_PER_PAGE, null));
         if (movies.getTotalPages() - 1 < pageNumber) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper
+                    .responseError(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
         }
         return new ResponseEntity<>(movies, HttpStatus.OK);
     }
@@ -139,14 +139,13 @@ public class AdminController {
     @RequestMapping(value = "/managemovies", method = RequestMethod.PUT)
     public ResponseEntity updRating(@RequestParam Long movieId) {
         if (!movieService.ifMovieExists(movieId)) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Can't find movie to update rating");
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "Can't find movie to update rating");
         }
 
         Movie movieToUpdate = movieService.getMovie(movieId);
         if (movieToUpdate == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to update movie");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("Unable to update movie. See all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to update movie");
         }
 
         List<Review> reviews = reviewService.getReviewsByMovieId(movieId);
@@ -160,8 +159,8 @@ public class AdminController {
 
         Movie updated = movieService.updateMovie(movieToUpdate);
         if (updated == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to update movie");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("Unable to update movie. Please, see all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to update movie");
         }
 
         return new ResponseEntity(HttpStatus.OK);
@@ -178,8 +177,7 @@ public class AdminController {
     @RequestMapping(value = "/managemovies/{movieId}", method = RequestMethod.GET)
     public ResponseEntity movieToEdit(@PathVariable Long movieId) {
         if (!movieService.ifMovieExists(movieId)) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No such movie found");
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No such movie found");
         }
 
         MovieContainer movieContainer;
@@ -187,8 +185,7 @@ public class AdminController {
             movieContainer = EntityHelper.completeMovie(movieId, movieService, reviewService, userService);
         } catch (OnGetNullException e) {
             LOGGER.error("Unable to get movie", e);
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
         return new ResponseEntity<>(movieContainer, HttpStatus.OK);
     }
@@ -212,25 +209,23 @@ public class AdminController {
                                     @Validated @RequestBody(required = false) MovieTransferObject movie,
                                     BindingResult errors) {
         if (movie == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.UNPROCESSABLE_ENTITY, "No movie data detected");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.warn("No movie data detected in the request");
+            return ResponseErrorHelper.responseError(HttpStatus.UNPROCESSABLE_ENTITY, "No movie data detected");
         }
         if (!movieService.ifMovieExists(movieId)) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No movie with such id found");
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No movie with such id found");
         }
         if (errors.hasErrors()) {
             List<String> validationErrors = errors.getFieldErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
-            ErrorEntity error = new ErrorEntity(HttpStatus.BAD_REQUEST, validationErrors);
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, validationErrors);
         }
 
         Movie movieToUpdate = movieService.getMovie(movieId);
         if (movieToUpdate == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Can't find movie to update");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("Can't find movie to update. Please, see all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Can't find movie to update");
         }
         Movie updated = movieService.updateMovie(EntityHelper.updateMovieFields(movieToUpdate, movie));
 
@@ -250,14 +245,13 @@ public class AdminController {
     @RequestMapping(value = "/delreview", method = RequestMethod.DELETE)
     public ResponseEntity deleteReview(@RequestParam Long reviewId) {
         if (!reviewService.ifReviewExists(reviewId)) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No review to delete found");
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No review to delete found");
         }
 
         Review reviewToDelete = reviewService.getReview(reviewId);
         if (reviewToDelete == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "No review to delete found");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("No review to delete found. Please, see all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "No review to delete found");
         }
         reviewService.deleteReview(reviewToDelete);
 
@@ -287,8 +281,8 @@ public class AdminController {
 
         Page<User> users = userService.getAllUsersPaged(new PageRequest(pageNumber, USER_RECORDS_PER_PAGE, sort));
         if (users.getTotalPages() - 1 < pageNumber) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Sorry, last page is " + (users.getTotalPages() - 1));
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper
+                    .responseError(HttpStatus.NOT_FOUND, "Sorry, last page is " + (users.getTotalPages() - 1));
         }
         users.forEach(user -> user.setPassword(null));
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -308,25 +302,29 @@ public class AdminController {
     @RequestMapping(value = "/adminize", method = RequestMethod.PUT)
     public ResponseEntity makeAdmin(@RequestParam Long userId) {
         if (!userService.ifUserExists(userId)) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No user with such id");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.warn("No user with such id");
+            return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No user with such id");
         }
 
         User userToUpdate = userService.getUser(userId);
         if (userToUpdate == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to find user to make admin");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("Unable to find user to make admin. See all logs for details");
+            return ResponseErrorHelper
+                    .responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to find user to make admin");
         }
-        Long currentUserId = PrincipalUtil.getCurrentPrincipal().getId();
-        if (currentUserId.equals(userToUpdate.getId())) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "Can't change your own admin state");
-            return new ResponseEntity<>(error, error.getStatus());
+        UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
+        if (currentUser == null) {
+            LOGGER.error("No authentication detected");// TODO 401?
+            return ResponseErrorHelper.responseError(HttpStatus.FORBIDDEN, "No authentication detected");
+        }
+        if (currentUser.getId().equals(userToUpdate.getId())) {
+            return ResponseErrorHelper.responseError(HttpStatus.CONFLICT, "Can't change your own admin state");
         }
         userToUpdate.setAdmin(!userToUpdate.isAdmin());
         User updated = userService.updateUser(userToUpdate);
         if (updated == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been updated");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("User has not been updated. Please, see all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been updated");
         }
 
         return new ResponseEntity<>("User " + updated.getLogin() + " is admin now", HttpStatus.OK);
@@ -346,25 +344,28 @@ public class AdminController {
     @RequestMapping(value = "/ban", method = RequestMethod.PUT)
     public ResponseEntity banUser(@RequestParam Long userId) {
         if (!userService.ifUserExists(userId)) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No user with such id");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("No user with such id");
+            return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No user with such id");
         }
 
         User userToUpdate = userService.getUser(userId);
         if (userToUpdate == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to ban user");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("Unable to find user to ban. Please, see logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to ban user");
         }
-        Long currentUserId = PrincipalUtil.getCurrentPrincipal().getId();
-        if (currentUserId.equals(userToUpdate.getId())) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "Can't ban yourself");
-            return new ResponseEntity<>(error, error.getStatus());
+        UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
+        if (currentUser == null) {
+            LOGGER.error("No authentication detected");
+            return ResponseErrorHelper.responseError(HttpStatus.FORBIDDEN, "No authentication detected");
+        }
+        if (currentUser.getId().equals(userToUpdate.getId())) {
+            return ResponseErrorHelper.responseError(HttpStatus.CONFLICT, "Can't ban yourself");
         }
         userToUpdate.setBanned(!userToUpdate.isBanned());
         User updated = userService.updateUser(userToUpdate);
         if (updated == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been updated");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("User has not been updated. See all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been updated");
         }
 
         return new ResponseEntity<>("User " + updated.getLogin() + " banned", HttpStatus.OK);
@@ -387,29 +388,27 @@ public class AdminController {
     public ResponseEntity addNewUser(@Validated({Default.class, CreateUserValidation.class})
                                      @RequestBody(required = false) UserTransferObject user, BindingResult errors) {
         if (user == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.UNPROCESSABLE_ENTITY, "No user data detected");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.warn("No user data detected in the request");
+            return ResponseErrorHelper.responseError(HttpStatus.UNPROCESSABLE_ENTITY, "No user data detected");
         }
         if (errors.hasErrors()) {
             List<String> validationErrors = errors.getFieldErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
-            ErrorEntity error = new ErrorEntity(HttpStatus.BAD_REQUEST, validationErrors);
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, validationErrors);
         }
 
         Boolean userExists = userService.getUserByLogin(user.getLogin()) != null;
         if (userExists) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.CONFLICT, "User with such login already exists");
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.CONFLICT, "User with such login already exists");
         }
         String encodedPassword = passwordManager.encode(user.getPassword());
         user.setPassword(encodedPassword);
         user.setBanned(false);
         User created = userService.createUser(EntityHelper.dtoToUser(user));
         if (created == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been created");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("User has not been created. See all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been created");
         }
 
         String success = "User <b>" + created.getLogin() + "</b> created successfully";

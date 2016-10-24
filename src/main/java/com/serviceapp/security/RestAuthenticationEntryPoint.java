@@ -11,16 +11,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Created by dsharko on 10/17/2016.
+ * Used to commence authentication scheme. Well, in case of this application it should just signal about unauthorized
+ * request
  */
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
+            throws IOException, ServletException {
         LOGGER.warn("Exception while auth: {}", authException.getMessage());
-        LOGGER.warn("Exception caused by: {}", authException.getCause());
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized access attempt");
     }
 

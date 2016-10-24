@@ -1,6 +1,5 @@
 package com.serviceapp.controller;
 
-import com.serviceapp.entity.ErrorEntity;
 import com.serviceapp.entity.User;
 import com.serviceapp.entity.dto.UserShortDto;
 import com.serviceapp.entity.dto.UserTransferObject;
@@ -9,7 +8,10 @@ import com.serviceapp.security.UserDetailsImpl;
 import com.serviceapp.service.UserService;
 import com.serviceapp.util.EntityHelper;
 import com.serviceapp.util.PrincipalUtil;
+import com.serviceapp.util.ResponseErrorHelper;
 import com.serviceapp.validation.marker.AccountValidation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/account")
 public class AccountController {
 
+    private static final Logger LOGGER = LogManager.getLogger();
     private UserService userService;
     private PasswordManager passwordManager;
 
@@ -55,19 +58,23 @@ public class AccountController {
      */
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity account(@RequestParam(value = "id", defaultValue = "0") Long userId) {
-        Long currentUserId = PrincipalUtil.getCurrentPrincipal().getId();
+        UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
+        if (currentUser == null) {
+            LOGGER.error("No authentication detected");// TODO 401?
+            return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, "No authentication detected");
+        }
         if (userId < 1) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.BAD_REQUEST, "Disallowed id detected");
-            return new ResponseEntity<>(error, error.getStatus());
-        } else if (!currentUserId.equals(userId)) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.FORBIDDEN, "Forbidden request");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.warn("Disallowed id detected: {}", userId);
+            return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, "Disallowed id detected");
+        } else if (!userId.equals(currentUser.getId())) {
+            LOGGER.warn("User {} attempts access foreign account: {}", currentUser.getUserName(), userId);
+            return ResponseErrorHelper.responseError(HttpStatus.FORBIDDEN, "Forbidden request");
         }
 
         User user = userService.getUser(userId);
         if (user == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to get user");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.warn("Unable to get user. Check all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to get user");
         }
         UserShortDto userTransferObject = EntityHelper.userToDtoShort(user);
 
@@ -93,32 +100,34 @@ public class AccountController {
             List<String> validationErrors = errors.getFieldErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
-            ErrorEntity error = new ErrorEntity(HttpStatus.BAD_REQUEST, validationErrors);
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, validationErrors);
         }
-        Long currentUserId = PrincipalUtil.getCurrentPrincipal().getId();
+        UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
+        if (currentUser == null) {
+            LOGGER.error("No authentication detected");// TODO 401?
+            return ResponseErrorHelper.responseError(HttpStatus.FORBIDDEN, "No authentication detected");
+        }
         User userCheck = userService.getUserByLogin(user.getLogin());
         if (userCheck != null) {
-            if (userCheck.getId().equals(currentUserId)) {
-                ErrorEntity error = new ErrorEntity(HttpStatus.FORBIDDEN, "This login is already in use");
-                return new ResponseEntity<>(error, error.getStatus());
+            if (userCheck.getId().equals(currentUser.getId())) {
+                return ResponseErrorHelper.responseError(HttpStatus.FORBIDDEN, "This login is already in use");
             }
         }
 
-        User currentUser = userService.getUser(currentUserId);
-        currentUser.setName(user.getName());
-        currentUser.setLogin(user.getLogin());
+        User userToUpdate = userService.getUser(currentUser.getId());
+        userToUpdate.setName(user.getName());
+        userToUpdate.setLogin(user.getLogin());
         if (!user.getPassword().isEmpty()) {
-            currentUser.setPassword(passwordManager.encode(user.getPassword()));
+            userToUpdate.setPassword(passwordManager.encode(user.getPassword()));
         }
 
-        User updatedUser = userService.updateUser(currentUser);
+        User updatedUser = userService.updateUser(userToUpdate);
         if (updatedUser == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "User is not updated");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.warn("Unable to update user. Check all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "User is not updated");
         }
 
-        resetAuthentication(currentUser);
+        resetAuthentication(userToUpdate);
         return new ResponseEntity(HttpStatus.OK);
     }
 

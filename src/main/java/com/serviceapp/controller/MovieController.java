@@ -1,16 +1,17 @@
 package com.serviceapp.controller;
 
-import com.serviceapp.entity.ErrorEntity;
 import com.serviceapp.entity.Movie;
 import com.serviceapp.entity.Review;
 import com.serviceapp.entity.dto.ReviewTransferObject;
 import com.serviceapp.entity.util.MovieContainer;
 import com.serviceapp.exception.OnGetNullException;
+import com.serviceapp.security.UserDetailsImpl;
 import com.serviceapp.service.MovieService;
 import com.serviceapp.service.ReviewService;
 import com.serviceapp.service.UserService;
 import com.serviceapp.util.EntityHelper;
 import com.serviceapp.util.PrincipalUtil;
+import com.serviceapp.util.ResponseErrorHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +62,8 @@ public class MovieController {
         int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
         Page<Movie> movies = movieService.findAllPaged(new PageRequest(pageNumber, RECORDS_PER_PAGE, null));
         if (movies.getTotalPages() - 1 < pageNumber) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper
+                    .responseError(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
         }
         return new ResponseEntity<>(movies, HttpStatus.OK);
     }
@@ -79,8 +80,7 @@ public class MovieController {
     @RequestMapping(value = "/{movieId}", method = RequestMethod.GET)
     public ResponseEntity movie(@PathVariable Long movieId) {
         if (!movieService.ifMovieExists(movieId)) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No such movie found");
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No such movie found");
         }
 
         MovieContainer container;
@@ -88,18 +88,16 @@ public class MovieController {
             container = EntityHelper.completeMovie(movieId, movieService, reviewService, userService);
         } catch (OnGetNullException e) {
             LOGGER.error("Unable to get movie", e);
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR,
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR,
                     e.getMessage() + " Some internal problems occurred");
-            return new ResponseEntity<>(error, error.getStatus());
         }
-        // TODO think about refactoring movie presentation
         return new ResponseEntity<>(container, HttpStatus.OK);
     }
 
     /**
      * Performs review posting and accompanied functions (recalculating movie rating)
      *
-     * @param movieId           path variable - id of movie for which review is written
+     * @param movieId      path variable - id of movie for which review is written
      * @param reviewObject object holding review data (title, text, rating)
      * @param errors       errors generated if <code>reviewObject</code> param failed validation
      * @return status code representing the status of the operation:
@@ -113,38 +111,40 @@ public class MovieController {
                                      @Validated @RequestBody(required = false) ReviewTransferObject reviewObject,
                                      BindingResult errors) {
         if (!movieService.ifMovieExists(movieId)) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.NOT_FOUND, "No such movie found");
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No such movie found");
         }
         if (errors.hasErrors()) {
             List<String> validationErrors = errors.getFieldErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
-            ErrorEntity error = new ErrorEntity(HttpStatus.BAD_REQUEST, validationErrors);
-            return new ResponseEntity<>(error, error.getStatus());
+            return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, validationErrors);
         }
 
-        Long currentUserId = PrincipalUtil.getCurrentPrincipal().getId();
+        UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
+        if (currentUser == null) {
+            LOGGER.error("No authentication detected");// TODO 401?
+            return ResponseErrorHelper.responseError(HttpStatus.FORBIDDEN, "No authentication detected");
+        }
         Date postDate = new Date(new java.util.Date().getTime());
 
         Review review = EntityHelper.dtoToReview(reviewObject);
         review.setMovieId(movieId);
-        review.setUserId(currentUserId);
+        review.setUserId(currentUser.getId());
         review.setPostDate(postDate);
         Review createdReview = reviewService.createReview(review);
         if (createdReview == null) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Review is not created");
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("Review is not created. Please, see all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Review is not created");
         }
         try {
             Movie updated = updateMovieRating(movieId, reviewObject.getRating());
             if (updated == null) {
-                ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Rating not updated");
-                return new ResponseEntity<>(error, error.getStatus());
+                LOGGER.error("Rating not updated. Please, see all logs for details");
+                return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Rating not updated");
             }
         } catch (OnGetNullException e) {
-            ErrorEntity error = new ErrorEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Rating not updated", e);
-            return new ResponseEntity<>(error, error.getStatus());
+            LOGGER.error("Rating not updated", e);
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Rating not updated", e);
         }
         return new ResponseEntity(HttpStatus.OK);
     }
