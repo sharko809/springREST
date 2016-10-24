@@ -38,7 +38,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      * @see User
      */
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        LOGGER.info("Trying to login {}", login);
+        LOGGER.info("Trying to login {}", login);// TODO handle writer error
         User user = userService.getUserByLogin(login);
         if (user == null) {
             throw new UsernameNotFoundException("User with login " + login + " not found.");

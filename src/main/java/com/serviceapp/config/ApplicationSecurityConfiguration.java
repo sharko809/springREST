@@ -1,5 +1,6 @@
 package com.serviceapp.config;
 
+import com.serviceapp.filter.CustomBasicAuthenticationFilter;
 import com.serviceapp.security.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import javax.servlet.Filter;
 
 /**
  * Configuration for Spring Security
@@ -26,6 +30,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @EnableWebSecurity
 public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    private static final String REALM = "SH_DART_REALM";
     private UserDetailsServiceImpl userDetailsService;
     private PasswordEncoder passwordEncoder;
 
@@ -48,15 +53,14 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
         return new AccessDeniedHandler();
     }
 
-
     @Bean
-    public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new AuthSuccessHandler();
+    public Filter basicAuthenticationFilter() throws Exception {
+        return new CustomBasicAuthenticationFilter(authenticationManager());
     }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/resources/**");
+        web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
     }
 
     @Override
@@ -87,11 +91,10 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic().authenticationEntryPoint(new RestAuthenticationEntryPoint())
-                .and()
+                .httpBasic().realmName(REALM).authenticationEntryPoint(new RestAuthenticationEntryPoint())
+                .and().addFilterAt(basicAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
                 .and()
                 .csrf().disable();
