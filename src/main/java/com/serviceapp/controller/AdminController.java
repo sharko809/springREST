@@ -314,7 +314,7 @@ public class AdminController {
         }
         UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
         if (currentUser == null) {
-            LOGGER.error("No authentication detected");// TODO 401?
+            LOGGER.error("No authentication detected");
             return ResponseErrorHelper.responseError(HttpStatus.FORBIDDEN, "No authentication detected");
         }
         if (currentUser.getId().equals(userToUpdate.getId())) {

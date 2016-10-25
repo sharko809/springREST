@@ -38,7 +38,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      * @see User
      */
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        LOGGER.info("Trying to login {}", login);// TODO handle writer error
+        LOGGER.info("Trying to login {}", login);
         User user = userService.getUserByLogin(login);
         if (user == null) {
             throw new UsernameNotFoundException("User with login " + login + " not found.");
@@ -46,10 +46,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         LOGGER.info("Found {}", user.getName());
 
         List<GrantedAuthority> authorities = new ArrayList<>();
-        if (!user.isAdmin()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        } else {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        if (!user.isBanned()){
+            if (!user.isAdmin()) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+            } else {
+                authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            }
         }
 
         return new UserDetailsImpl(

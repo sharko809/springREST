@@ -1,12 +1,14 @@
 package com.serviceapp.config;
 
-import com.serviceapp.filter.CustomBasicAuthenticationFilter;
-import com.serviceapp.security.*;
+import com.serviceapp.filter.AuthFilter;
+import com.serviceapp.security.AccessDeniedHandler;
+import com.serviceapp.security.AuthFailureHandler;
+import com.serviceapp.security.RestAuthenticationEntryPoint;
+import com.serviceapp.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -18,7 +20,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.Filter;
@@ -53,11 +54,6 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
         return new AccessDeniedHandler();
     }
 
-    @Bean
-    public Filter basicAuthenticationFilter() throws Exception {
-        return new CustomBasicAuthenticationFilter(authenticationManager());
-    }
-
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
@@ -74,10 +70,15 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
         return new AuthFailureHandler();
     }
 
-    @Bean(name = "authManager")
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+//    @Bean(name = "authManager")
+//    @Override
+//    public AuthenticationManager authenticationManagerBean() throws Exception {
+//        return super.authenticationManagerBean();
+//    }
+
+    @Bean
+    public Filter authFilter() throws Exception {
+        return new AuthFilter(authenticationManager());
     }
 
     @Bean
@@ -91,10 +92,11 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .anyRequest().authenticated()
+                .anyRequest().hasAnyRole("USER", "ADMIN")
                 .and()
                 .httpBasic().realmName(REALM).authenticationEntryPoint(new RestAuthenticationEntryPoint())
-                .and().addFilterAt(basicAuthenticationFilter(), BasicAuthenticationFilter.class)
+                .and().addFilterAt(authFilter(), BasicAuthenticationFilter.class)
+//                .and()
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
                 .and()
                 .csrf().disable();

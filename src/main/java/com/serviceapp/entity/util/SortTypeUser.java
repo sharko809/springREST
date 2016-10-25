@@ -16,7 +16,7 @@ public enum SortTypeUser {
     /**
      * Sort by name
      */
-    USERNAME(2, "username"),
+    NAME(2, "name"),
     /**
      * Sort by admin authorities
      */

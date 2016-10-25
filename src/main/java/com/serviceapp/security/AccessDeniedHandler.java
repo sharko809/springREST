@@ -37,8 +37,7 @@ public class AccessDeniedHandler implements org.springframework.security.web.acc
     private void handleDenied(HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex)
             throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        String message = "Action is forbidden" +
-                ("/".equals(request.getServletPath()) ? ": authorized users can't access login page" : "");
+        String message = "You are banned!";
         OBJECT_MAPPER.writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, message, ex));
     }
 

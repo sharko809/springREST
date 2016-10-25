@@ -122,7 +122,7 @@ public class MovieController {
 
         UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
         if (currentUser == null) {
-            LOGGER.error("No authentication detected");// TODO 401?
+            LOGGER.error("No authentication detected");
             return ResponseErrorHelper.responseError(HttpStatus.FORBIDDEN, "No authentication detected");
         }
         Date postDate = new Date(new java.util.Date().getTime());

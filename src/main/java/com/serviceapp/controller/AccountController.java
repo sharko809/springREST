@@ -64,8 +64,8 @@ public class AccountController {
     public ResponseEntity account() {
         UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
         if (currentUser == null) {
-            LOGGER.error("No authentication detected");// TODO 401?
-            return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, "No authentication detected");
+            LOGGER.error("No authentication detected");
+            return ResponseErrorHelper.responseError(HttpStatus.FORBIDDEN, "No authentication detected");
         }
 
         User user = userService.getUser(currentUser.getId());
@@ -95,7 +95,7 @@ public class AccountController {
                                         @RequestBody UserTransferObject user, BindingResult errors) {
         UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
         if (currentUser == null) {
-            LOGGER.error("No authentication detected");// TODO 401?
+            LOGGER.error("No authentication detected");
             return ResponseErrorHelper.responseError(HttpStatus.FORBIDDEN, "No authentication detected");
         }
         if (errors.hasErrors()) {
