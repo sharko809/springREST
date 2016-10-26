@@ -13,7 +13,7 @@ public class ReviewTransferObject {
             message = "{review.title.pattern}")
     private String title;
 
-    @NotNull
+    @NotNull(message = "{review.rating.null}")
     @Min(value = 1, message = "{review.rating.min}")
     @Max(value = 10, message = "{review.rating.max}")
     private Integer rating;

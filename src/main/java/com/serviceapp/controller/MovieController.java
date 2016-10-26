@@ -146,7 +146,15 @@ public class MovieController {
             LOGGER.error("Rating not updated", e);
             return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Rating not updated", e);
         }
-        return new ResponseEntity(HttpStatus.OK);
+        MovieContainer container;
+        try {
+            container = EntityHelper.completeMovie(movieId, movieService, reviewService, userService);
+        } catch (OnGetNullException e) {
+            LOGGER.error("Unable to get movie", e);
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR,
+                    e.getMessage() + " Some internal problems occurred");
+        }
+        return new ResponseEntity<>(container, HttpStatus.OK);
     }
 
     /**
