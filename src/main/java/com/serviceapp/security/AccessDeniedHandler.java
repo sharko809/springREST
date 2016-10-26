@@ -37,6 +37,11 @@ public class AccessDeniedHandler implements org.springframework.security.web.acc
     private void handleDenied(HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex)
             throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:63342");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS, PUT, DELETE");
+        response.setHeader("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, " +
+                "Access-Control-Request-Method, Access-Control-Request-Headers");
         String message = "You are banned!";
         OBJECT_MAPPER.writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, message, ex));
     }

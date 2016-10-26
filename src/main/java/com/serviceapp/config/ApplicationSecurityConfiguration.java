@@ -70,12 +70,6 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
         return new AuthFailureHandler();
     }
 
-//    @Bean(name = "authManager")
-//    @Override
-//    public AuthenticationManager authenticationManagerBean() throws Exception {
-//        return super.authenticationManagerBean();
-//    }
-
     @Bean
     public Filter authFilter() throws Exception {
         return new AuthFilter(authenticationManager());
@@ -96,7 +90,6 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .and()
                 .httpBasic().realmName(REALM).authenticationEntryPoint(new RestAuthenticationEntryPoint())
                 .and().addFilterAt(authFilter(), BasicAuthenticationFilter.class)
-//                .and()
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
                 .and()
                 .csrf().disable();

@@ -21,6 +21,8 @@ public class RestAuthenticationEntryPoint extends BasicAuthenticationEntryPoint 
             throws IOException, ServletException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.addHeader("WWW-Authenticate", "Basic realm=" + getRealmName() + "");
+
+        response.getWriter().write("Http status 401: " + authException.getMessage());
     }
 
     @Override
