@@ -58,10 +58,10 @@ public class ReviewServiceTest {
 
     @Test
     public void ifReviewExists() throws Exception {
-        assertTrue(reviewService.ifReviewExists(2L));
-        assertFalse(reviewService.ifReviewExists(NULL_LONG));
-        assertFalse(reviewService.ifReviewExists(ZERO_ID));
-        assertFalse(reviewService.ifReviewExists(NEGATIVE_ID));
+        assertTrue(reviewService.reviewExists(2L));
+        assertFalse(reviewService.reviewExists(NULL_LONG));
+        assertFalse(reviewService.reviewExists(ZERO_ID));
+        assertFalse(reviewService.reviewExists(NEGATIVE_ID));
     }
 
 }

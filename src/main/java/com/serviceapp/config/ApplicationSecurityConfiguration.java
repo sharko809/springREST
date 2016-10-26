@@ -31,7 +31,6 @@ import javax.servlet.Filter;
 @EnableWebSecurity
 public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private static final String REALM = "SH_DART_REALM";
     private UserDetailsServiceImpl userDetailsService;
     private PasswordEncoder passwordEncoder;
 
@@ -86,9 +85,12 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
+                .antMatchers("/admin**", "/admin/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.GET, "/movies**", "/movies/**", "/search**").permitAll()
+                .antMatchers(HttpMethod.POST, "/registration").permitAll()
                 .anyRequest().hasAnyRole("USER", "ADMIN")
                 .and()
-                .httpBasic().realmName(REALM).authenticationEntryPoint(new RestAuthenticationEntryPoint())
+                .httpBasic().authenticationEntryPoint(new RestAuthenticationEntryPoint())
                 .and().addFilterAt(authFilter(), BasicAuthenticationFilter.class)
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
                 .and()

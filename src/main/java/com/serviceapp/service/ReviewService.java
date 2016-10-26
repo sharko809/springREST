@@ -84,7 +84,7 @@ public class ReviewService {
      * @param id id of <code>Review</code> to check. Must not be <code>null</code>, otherwise returns <code>false</code>
      * @return <code>true</code> if an entity with the given id exists, <code>false</code> otherwise
      */
-    public Boolean ifReviewExists(Long id) {
+    public Boolean reviewExists(Long id) {
         return id != null && reviewRepository.exists(id);
     }
 

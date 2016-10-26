@@ -49,15 +49,15 @@ public class MovieServiceTest {
 
     @Test
     public void ifMovieExists() throws Exception {
-        assertTrue(movieService.ifMovieExists(OK_ID));
-        assertFalse(movieService.ifMovieExists(NEGATIVE_ID));
-        assertFalse(movieService.ifMovieExists(ZERO_ID));
+        assertTrue(movieService.movieExists(OK_ID));
+        assertFalse(movieService.movieExists(NEGATIVE_ID));
+        assertFalse(movieService.movieExists(ZERO_ID));
     }
 
     @Test
     public void ifMovieExistsNullClause() throws Exception {
         // null value treated in a way that results in false
-        assertFalse(movieService.ifMovieExists(NULL_LONG));
+        assertFalse(movieService.movieExists(NULL_LONG));
     }
 
     @Test

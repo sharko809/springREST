@@ -50,15 +50,15 @@ public class UserServiceTest {
 
     @Test
     public void ifUserExists() throws Exception {
-        assertTrue(userService.ifUserExists(OK_ID));
-        assertFalse(userService.ifUserExists(NEGATIVE_ID));
-        assertFalse(userService.ifUserExists(ZERO_ID));
+        assertTrue(userService.userExists(OK_ID));
+        assertFalse(userService.userExists(NEGATIVE_ID));
+        assertFalse(userService.userExists(ZERO_ID));
     }
 
     @Test
     public void ifUserExistsNullClause() throws Exception {
         // null value treated in a way that results in false
-        assertFalse(userService.ifUserExists(NULL_LONG));
+        assertFalse(userService.userExists(NULL_LONG));
     }
 
     @Test

@@ -101,7 +101,7 @@ public class UserService {
      * @param id id of <code>User</code> to check. Must not be <code>null</code>, otherwise returns <code>false</code>
      * @return <code>true</code> if an entity with the given id exists, <code>false</code> otherwise
      */
-    public Boolean ifUserExists(Long id) {
+    public Boolean userExists(Long id) {
         return id != null && userRepository.exists(id);
     }
 

@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public class MovieController {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Integer RECORDS_PER_PAGE = 5;
+    private static final Integer RECORDS_PER_PAGE = 6;
     private MovieService movieService;
     private ReviewService reviewService;
     private UserService userService;
@@ -79,7 +79,7 @@ public class MovieController {
      */
     @RequestMapping(value = "/{movieId}", method = RequestMethod.GET)
     public ResponseEntity movie(@PathVariable Long movieId) {
-        if (!movieService.ifMovieExists(movieId)) {
+        if (!movieService.movieExists(movieId)) {
             return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No such movie found");
         }
 
@@ -110,7 +110,7 @@ public class MovieController {
     public ResponseEntity postReview(@PathVariable Long movieId,
                                      @Validated @RequestBody(required = false) ReviewTransferObject reviewObject,
                                      BindingResult errors) {
-        if (!movieService.ifMovieExists(movieId)) {
+        if (!movieService.movieExists(movieId)) {
             return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No such movie found");
         }
         if (errors.hasErrors()) {

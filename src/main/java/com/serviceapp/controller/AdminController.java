@@ -138,7 +138,7 @@ public class AdminController {
      */
     @RequestMapping(value = "/managemovies", method = RequestMethod.PUT)
     public ResponseEntity updRating(@RequestParam Long movieId) {
-        if (!movieService.ifMovieExists(movieId)) {
+        if (!movieService.movieExists(movieId)) {
             return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "Can't find movie to update rating");
         }
 
@@ -176,7 +176,7 @@ public class AdminController {
      */
     @RequestMapping(value = "/managemovies/{movieId}", method = RequestMethod.GET)
     public ResponseEntity movieToEdit(@PathVariable Long movieId) {
-        if (!movieService.ifMovieExists(movieId)) {
+        if (!movieService.movieExists(movieId)) {
             return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No such movie found");
         }
 
@@ -212,7 +212,7 @@ public class AdminController {
             LOGGER.warn("No movie data detected in the request");
             return ResponseErrorHelper.responseError(HttpStatus.UNPROCESSABLE_ENTITY, "No movie data detected");
         }
-        if (!movieService.ifMovieExists(movieId)) {
+        if (!movieService.movieExists(movieId)) {
             return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No movie with such id found");
         }
         if (errors.hasErrors()) {
@@ -244,7 +244,7 @@ public class AdminController {
      */
     @RequestMapping(value = "/delreview", method = RequestMethod.DELETE)
     public ResponseEntity deleteReview(@RequestParam Long reviewId) {
-        if (!reviewService.ifReviewExists(reviewId)) {
+        if (!reviewService.reviewExists(reviewId)) {
             return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No review to delete found");
         }
 
@@ -301,7 +301,7 @@ public class AdminController {
      */
     @RequestMapping(value = "/adminize", method = RequestMethod.PUT)
     public ResponseEntity makeAdmin(@RequestParam Long userId) {
-        if (!userService.ifUserExists(userId)) {
+        if (!userService.userExists(userId)) {
             LOGGER.warn("No user with such id");
             return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No user with such id");
         }
@@ -343,7 +343,7 @@ public class AdminController {
      */
     @RequestMapping(value = "/ban", method = RequestMethod.PUT)
     public ResponseEntity banUser(@RequestParam Long userId) {
-        if (!userService.ifUserExists(userId)) {
+        if (!userService.userExists(userId)) {
             LOGGER.error("No user with such id");
             return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "No user with such id");
         }

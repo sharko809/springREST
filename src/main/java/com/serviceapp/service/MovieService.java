@@ -101,7 +101,7 @@ public class MovieService {
      * @param id id of <code>Movie</code> to check. Must not be <code>null</code>, otherwise returns <code>false</code>
      * @return <code>true</code> if an entity with the given id exists, <code>false</code> otherwise
      */
-    public Boolean ifMovieExists(Long id) {
+    public Boolean movieExists(Long id) {
         return id != null && movieRepository.exists(id);
     }
 

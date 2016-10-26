@@ -2,6 +2,7 @@ package com.serviceapp.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serviceapp.entity.ErrorEntity;
+import com.serviceapp.util.PrincipalUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.WebAttributes;
@@ -42,7 +43,7 @@ public class AccessDeniedHandler implements org.springframework.security.web.acc
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS, PUT, DELETE");
         response.setHeader("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, " +
                 "Access-Control-Request-Method, Access-Control-Request-Headers");
-        String message = "You are banned!";
+        String message = composeMessage(ex);
         OBJECT_MAPPER.writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, message, ex));
     }
 
@@ -57,6 +58,25 @@ public class AccessDeniedHandler implements org.springframework.security.web.acc
             return;
         }
         session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+    }
+
+    /**
+     * Composes the message to be send to client
+     *
+     * @param ex exception that caused access denial
+     * @return message to send to client
+     */
+    private String composeMessage(Exception ex) {
+        UserDetailsImpl principal = PrincipalUtil.getCurrentPrincipal();
+        String message = "Access denied";
+        if (principal != null) {
+            if (principal.isBanned()) {
+                message = "You are banned";
+            }
+        } else {
+            message = ex.getMessage();
+        }
+        return message;
     }
 
 }
