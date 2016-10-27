@@ -4,7 +4,7 @@ import com.serviceapp.entity.User;
 import com.serviceapp.entity.dto.UserShortDto;
 import com.serviceapp.entity.dto.UserTransferObject;
 import com.serviceapp.security.PasswordManager;
-import com.serviceapp.security.UserDetailsImpl;
+import com.serviceapp.security.securityEntity.UserDetailsImpl;
 import com.serviceapp.service.UserService;
 import com.serviceapp.util.EntityHelper;
 import com.serviceapp.util.PrincipalUtil;

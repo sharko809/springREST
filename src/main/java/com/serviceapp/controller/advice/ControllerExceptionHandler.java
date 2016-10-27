@@ -62,7 +62,8 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(Throwable.class)
     public ResponseEntity getException(HttpServletRequest request, Exception ex) {
         LOGGER.error("Something bad happened", ex);
-        return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, "Something bad happened", ex, request);
+        String message = (ex.getMessage() == null) ? "Something bad happened" : ex.getMessage();
+        return ResponseErrorHelper.responseError(HttpStatus.BAD_REQUEST, message, ex, request);
     }
 
 }

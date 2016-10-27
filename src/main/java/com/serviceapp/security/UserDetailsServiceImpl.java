@@ -1,6 +1,7 @@
 package com.serviceapp.security;
 
 import com.serviceapp.entity.User;
+import com.serviceapp.security.securityEntity.UserDetailsImpl;
 import com.serviceapp.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

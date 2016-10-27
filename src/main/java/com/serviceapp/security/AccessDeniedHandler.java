@@ -2,6 +2,7 @@ package com.serviceapp.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serviceapp.entity.ErrorEntity;
+import com.serviceapp.security.securityEntity.UserDetailsImpl;
 import com.serviceapp.util.PrincipalUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;

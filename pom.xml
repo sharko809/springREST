@@ -154,6 +154,13 @@
             <artifactId>hibernate-validator</artifactId>
             <version>5.3.0.CR1</version>
         </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.7.0</version>
+        </dependency>
+
+
 
     </dependencies>
     <build>

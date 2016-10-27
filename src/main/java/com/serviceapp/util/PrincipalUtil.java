@@ -1,6 +1,6 @@
 package com.serviceapp.util;
 
-import com.serviceapp.security.UserDetailsImpl;
+import com.serviceapp.security.securityEntity.UserDetailsImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 

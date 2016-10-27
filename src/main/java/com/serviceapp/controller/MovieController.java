@@ -5,7 +5,7 @@ import com.serviceapp.entity.Review;
 import com.serviceapp.entity.dto.ReviewTransferObject;
 import com.serviceapp.entity.util.MovieContainer;
 import com.serviceapp.exception.OnGetNullException;
-import com.serviceapp.security.UserDetailsImpl;
+import com.serviceapp.security.securityEntity.UserDetailsImpl;
 import com.serviceapp.service.MovieService;
 import com.serviceapp.service.ReviewService;
 import com.serviceapp.service.UserService;
