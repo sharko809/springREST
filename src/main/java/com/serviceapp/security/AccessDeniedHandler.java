@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serviceapp.entity.ErrorEntity;
 import com.serviceapp.security.securityEntity.UserDetailsImpl;
 import com.serviceapp.util.PrincipalUtil;
+import com.serviceapp.util.ResponseHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.WebAttributes;
@@ -39,11 +40,7 @@ public class AccessDeniedHandler implements org.springframework.security.web.acc
     private void handleDenied(HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex)
             throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:63342");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS, PUT, DELETE");
-        response.setHeader("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, " +
-                "Access-Control-Request-Method, Access-Control-Request-Headers");
+        ResponseHelper.setCorsHeader(response);
         String message = composeMessage(ex);
         OBJECT_MAPPER.writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, message, ex));
     }
