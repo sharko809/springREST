@@ -1,6 +1,7 @@
 package com.serviceapp.security;
 
 import com.serviceapp.security.securityEntity.TokenAuthentication;
+import com.serviceapp.security.securityEntity.UserDetailsImpl;
 import com.serviceapp.service.CustomTokenService;
 import io.jsonwebtoken.impl.DefaultClaims;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +10,13 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Authentication manager implementation used to provide authentication to protected resources via JWT
@@ -81,10 +85,16 @@ public class TokenAuthenticationManager implements AuthenticationManager {
             throws AuthenticationException {
         boolean banned = claims.get("user_banned", Boolean.class);
         if (!banned) {
-            Collection<GrantedAuthority> authorities = claims.get("user_authorities", Collection.class);
+            Collection<GrantedAuthority> authorities = new ArrayList<>();
+            List authoritiesList = claims.get("user_authorities", List.class);
+            authoritiesList.forEach(a -> {
+                authorities.add(new SimpleGrantedAuthority(a.toString()));
+            });
+            Integer id = claims.get("user_id", Integer.class);
             String login = claims.get("user_login", String.class);
             String userName = claims.get("user_name", String.class);
-            return new TokenAuthentication(authentication.getToken(), authorities, true, login, userName);
+            UserDetailsImpl principal = new UserDetailsImpl(Long.valueOf(id), userName, login, "randomtext", authorities, false);
+            return new TokenAuthentication(authentication.getToken(), authorities, true, principal);
         } else {
             throw new AuthenticationServiceException("User is banned");
         }

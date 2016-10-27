@@ -8,9 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -62,7 +64,21 @@ public class JwtAuthFilter extends AbstractAuthenticationProcessingFilter {
         String authorizationToken = authHeader.substring(7);
         TokenAuthentication tokenAuthentication = new TokenAuthentication(authorizationToken);
 
-        return getAuthenticationManager().authenticate(tokenAuthentication);
+        Authentication authenticated = getAuthenticationManager().authenticate(tokenAuthentication);
+
+        if (new AntPathMatcher().match("/admin/**", request.getServletPath())) {
+            if (!ifAdmin(authenticated)) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setHeader("Access-Control-Allow-Origin", "http://localhost:63342");
+                response.setHeader("Access-Control-Allow-Credentials", "true");
+                response.setHeader("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS, PUT, DELETE");
+                response.setHeader("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, " +
+                        "Access-Control-Request-Method, Access-Control-Request-Headers");
+                OBJECT_MAPPER.writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, "Access denied"));
+            }
+        }
+
+        return authenticated;
     }
 
     @Override
@@ -70,6 +86,24 @@ public class JwtAuthFilter extends AbstractAuthenticationProcessingFilter {
                                             Authentication authResult) throws IOException, ServletException {
         super.successfulAuthentication(request, response, chain, authResult);
         chain.doFilter(request, response);
+    }
+
+    /**
+     * Checks if provided authentication object contains admin role
+     *
+     * @param authentication authentication object
+     * @return <code>true</code> if provided authentication object contains "ROLE_ADMIN"
+     */
+    private boolean ifAdmin(Authentication authentication) {
+        if (authentication == null) {
+            return false;
+        }
+        for (GrantedAuthority a : authentication.getAuthorities()) {
+            if (a.toString().contains("ROLE_ADMIN")) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -14,20 +14,18 @@ public class TokenAuthentication implements Authentication {
     private String token;
     private Collection<? extends GrantedAuthority> authorities;
     private boolean isAuthenticated;
-    private String login;
-    private String userName;
+    private UserDetailsImpl principal;
 
     public TokenAuthentication(String token) {
         this.token = token;
     }
 
     public TokenAuthentication(String token, Collection<? extends GrantedAuthority> authorities,
-                               boolean isAuthenticated, String login, String userName) {
+                               boolean isAuthenticated, UserDetailsImpl principal) {
         this.token = token;
         this.authorities = authorities;
         this.isAuthenticated = isAuthenticated;
-        this.login = login;
-        this.userName = userName;
+        this.principal = principal;
     }
 
     public String getToken() {
@@ -51,7 +49,7 @@ public class TokenAuthentication implements Authentication {
 
     @Override
     public Object getPrincipal() {
-        return login;
+        return principal;
     }
 
     @Override
@@ -66,6 +64,9 @@ public class TokenAuthentication implements Authentication {
 
     @Override
     public String getName() {
-        return this.userName;
+        if (principal != null) {
+            return principal.getUserName();
+        }
+        return null;
     }
 }
