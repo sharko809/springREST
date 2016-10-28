@@ -229,7 +229,7 @@ public class AdminController {
         }
         Movie updated = movieService.updateMovie(EntityHelper.updateMovieFields(movieToUpdate, movie));
 
-        return new ResponseEntity<>("Movie " + updated.getMovieName() + " updated", HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
