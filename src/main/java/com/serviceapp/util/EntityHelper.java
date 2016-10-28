@@ -110,6 +110,7 @@ public class EntityHelper {
         userTransferObject.setId(user.getId());
         userTransferObject.setName(user.getName());
         userTransferObject.setLogin(user.getLogin());
+        userTransferObject.setBanned(user.isBanned());
         return userTransferObject;
     }
 

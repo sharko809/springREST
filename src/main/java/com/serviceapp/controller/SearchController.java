@@ -44,7 +44,7 @@ public class SearchController {
         if (movies != null) {
             if (movies.getTotalPages() - 1 < pageNumber && movies.getTotalPages() != 0) {
                 return ResponseErrorHelper
-                        .responseError(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
+                        .responseError(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages()));
             }
         }
         return new ResponseEntity<>(movies, HttpStatus.OK);

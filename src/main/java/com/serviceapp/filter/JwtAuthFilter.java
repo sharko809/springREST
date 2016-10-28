@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serviceapp.entity.ErrorEntity;
 import com.serviceapp.exception.TokenMissingException;
 import com.serviceapp.security.securityEntity.TokenAuthentication;
+import com.serviceapp.util.ResponseHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -37,11 +38,7 @@ public class JwtAuthFilter extends AbstractAuthenticationProcessingFilter {
         });
         setAuthenticationFailureHandler((request, response, authenticationException) -> {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.setHeader("Access-Control-Allow-Origin", "http://localhost:63342");
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-            response.setHeader("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS, PUT, DELETE");
-            response.setHeader("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, " +
-                    "Access-Control-Request-Method, Access-Control-Request-Headers");
+            ResponseHelper.setCorsHeader(response);
             OBJECT_MAPPER
                     .writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, authenticationException.getMessage()));
         });
@@ -68,12 +65,7 @@ public class JwtAuthFilter extends AbstractAuthenticationProcessingFilter {
 
         if (new AntPathMatcher().match("/admin/**", request.getServletPath())) {
             if (!ifAdmin(authenticated)) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.setHeader("Access-Control-Allow-Origin", "http://localhost:63342");
-                response.setHeader("Access-Control-Allow-Credentials", "true");
-                response.setHeader("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS, PUT, DELETE");
-                response.setHeader("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, " +
-                        "Access-Control-Request-Method, Access-Control-Request-Headers");
+                ResponseHelper.setCorsHeader(response);
                 OBJECT_MAPPER.writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, "Access denied"));
             }
         }

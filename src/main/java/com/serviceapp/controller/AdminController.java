@@ -120,7 +120,7 @@ public class AdminController {
         Page<Movie> movies = movieService.findAllPaged(new PageRequest(pageNumber, MOVIE_RECORDS_PER_PAGE, null));
         if (movies.getTotalPages() - 1 < pageNumber) {
             return ResponseErrorHelper
-                    .responseError(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages() - 1));
+                    .responseError(HttpStatus.NOT_FOUND, "Sorry, last page is " + (movies.getTotalPages()));
         }
         return new ResponseEntity<>(movies, HttpStatus.OK);
     }
@@ -163,7 +163,7 @@ public class AdminController {
             return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to update movie");
         }
 
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>(updated.getRating(), HttpStatus.OK);
     }
 
     /**
@@ -259,6 +259,25 @@ public class AdminController {
     }
 
     /**
+     * Get reviews for particular movie
+     *
+     * @param movieId id of movie to retrieve reviews
+     * @return <code>ResponseEntity</code> with reviews and OK status if found. Also may return 404 status code if
+     * movie with provided id doesn't exist
+     */
+    @RequestMapping(value = "/reviews/{movieId}")
+    public ResponseEntity movieReviews(@PathVariable Long movieId) {
+        if (!movieService.movieExists(movieId)) {
+            return ResponseErrorHelper.responseError(HttpStatus.NOT_FOUND, "Requested movie not found");
+        }
+
+        List<Review> reviews = reviewService.getReviewsByMovieId(movieId);
+        reviews.sort((r1, r2) -> r2.getPostDate().compareTo(r1.getPostDate()));
+
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+    /**
      * Get paged users list
      *
      * @param pageable <code>org.springframework.data.domain.Pageable</code> for convenient pagination and sorting
@@ -282,7 +301,7 @@ public class AdminController {
         Page<User> users = userService.getAllUsersPaged(new PageRequest(pageNumber, USER_RECORDS_PER_PAGE, sort));
         if (users.getTotalPages() - 1 < pageNumber) {
             return ResponseErrorHelper
-                    .responseError(HttpStatus.NOT_FOUND, "Sorry, last page is " + (users.getTotalPages() - 1));
+                    .responseError(HttpStatus.NOT_FOUND, "Sorry, last page is " + (users.getTotalPages()));
         }
         users.forEach(user -> user.setPassword(null));
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -327,7 +346,7 @@ public class AdminController {
             return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been updated");
         }
 
-        return new ResponseEntity<>("User " + updated.getLogin() + " is admin now", HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -368,7 +387,7 @@ public class AdminController {
             return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "User has not been updated");
         }
 
-        return new ResponseEntity<>("User " + updated.getLogin() + " banned", HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**

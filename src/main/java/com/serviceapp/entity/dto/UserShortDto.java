@@ -9,13 +9,12 @@ import javax.validation.constraints.Size;
  */
 public class UserShortDto {
 
+    boolean banned;
     private Long id;
-
     @NotNull
     @Size(min = 3, max = 20, message = "{username.size}")
     @Pattern(regexp = "[\\p{L}0-9]+([ '-][\\p{L}0-9]+)*", message = "{username.pattern}")
     private String name;
-
     @NotNull
     @Size(min = 3, max = 60, message = "{login.size}")
     @Pattern(regexp = "^[_A-Za-z0-9-+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
@@ -23,6 +22,14 @@ public class UserShortDto {
     private String login;
 
     public UserShortDto() {
+    }
+
+    public boolean isBanned() {
+        return banned;
+    }
+
+    public void setBanned(boolean banned) {
+        this.banned = banned;
     }
 
     public Long getId() {
