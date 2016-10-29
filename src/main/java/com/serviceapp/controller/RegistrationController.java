@@ -15,10 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.groups.Default;
 import java.util.List;
@@ -49,7 +46,7 @@ public class RegistrationController {
      * @return message(s) indicating the status of registration. It could be either error messages describing cause of
      * error so the user can fix it, or the success message if registration completed.
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     public ResponseEntity register(@Validated({Default.class, RegistrationValidation.class})
                                    @RequestBody(required = false) UserTransferObject user, BindingResult errors) {
         if (user == null) {

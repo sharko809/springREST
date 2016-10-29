@@ -227,7 +227,12 @@ public class AdminController {
             LOGGER.error("Can't find movie to update. Please, see all logs for details");
             return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Can't find movie to update");
         }
+
         Movie updated = movieService.updateMovie(EntityHelper.updateMovieFields(movieToUpdate, movie));
+        if (updated == null) {
+            LOGGER.error("Unable to edit movie. Please, see all logs for details");
+            return ResponseErrorHelper.responseError(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to edit movie");
+        }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -432,6 +437,17 @@ public class AdminController {
 
         String success = "User <b>" + created.getLogin() + "</b> created successfully";
         return new ResponseEntity<>(success, HttpStatus.OK);
+    }
+
+    /**
+     * Used to indicate weather user is admin.
+     *
+     * @return http status code 200
+     */
+    @RequestMapping(value = "/check", method = RequestMethod.GET)
+    public ResponseEntity admin() {
+        LOGGER.debug("ADMIN");
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

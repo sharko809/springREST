@@ -22,10 +22,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.groups.Default;
 import java.util.List;
@@ -60,7 +57,7 @@ public class AccountController {
      * <li>403 - if user attempts to access another users account</li>
      * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
      */
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public ResponseEntity account() {
         UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
         if (currentUser == null) {
@@ -90,7 +87,7 @@ public class AccountController {
      * <li>403 - if trying to change login to already existing one</li>
      * <li>500 - if some internal error that can't be handled at once occurred (primarily some severe db errors)</li>
      */
-    @RequestMapping(method = RequestMethod.PUT)
+    @PutMapping
     public ResponseEntity updateAccount(@Validated({Default.class, AccountValidation.class})
                                         @RequestBody UserTransferObject user, BindingResult errors) {
         UserDetailsImpl currentUser = PrincipalUtil.getCurrentPrincipal();
@@ -128,6 +125,16 @@ public class AccountController {
 
         resetAuthentication(userToUpdate);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    /**
+     * Used to indicate weather user is authenticated.
+     *
+     * @return http status code 200
+     */
+    @RequestMapping(value = "/check", method = RequestMethod.GET)
+    public ResponseEntity authenticated() {
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**

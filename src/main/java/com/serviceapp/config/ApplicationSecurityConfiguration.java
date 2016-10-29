@@ -80,7 +80,7 @@ public class ApplicationSecurityConfiguration extends WebSecurityConfigurerAdapt
 
     @Bean
     public Filter accountTokenFilter() {
-        return new JwtAuthFilter(new AntPathRequestMatcher("/account**"), authenticationManager);
+        return new JwtAuthFilter(new AntPathRequestMatcher("/account/**"), authenticationManager);
     }
 
     @Bean

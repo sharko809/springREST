@@ -57,7 +57,7 @@ public class MovieController {
      * Status codes:
      * <li>200 - if movies retrieved successfully. Body will be a paged movies list</li>
      */
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public ResponseEntity paged(Pageable pageable) {
         int pageNumber = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
         Page<Movie> movies = movieService.findAllPaged(new PageRequest(pageNumber, RECORDS_PER_PAGE, null));

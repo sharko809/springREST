@@ -65,6 +65,7 @@ public class JwtAuthFilter extends AbstractAuthenticationProcessingFilter {
 
         if (new AntPathMatcher().match("/admin/**", request.getServletPath())) {
             if (!ifAdmin(authenticated)) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 ResponseHelper.setCorsHeader(response);
                 OBJECT_MAPPER.writeValue(response.getWriter(), new ErrorEntity(HttpStatus.FORBIDDEN, "Access denied"));
             }
