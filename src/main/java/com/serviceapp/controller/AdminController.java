@@ -446,7 +446,6 @@ public class AdminController {
      */
     @RequestMapping(value = "/check", method = RequestMethod.GET)
     public ResponseEntity admin() {
-        LOGGER.debug("ADMIN");
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

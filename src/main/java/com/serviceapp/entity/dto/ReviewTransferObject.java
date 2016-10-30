@@ -7,7 +7,7 @@ import javax.validation.constraints.*;
  */
 public class ReviewTransferObject {
 
-    @NotNull
+    @NotNull(message = "{review.title.null}")
     @Size(min = 3, max = 100, message = "{review.title.size}")
     @Pattern(regexp = "[\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}]+([ '-][\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}]+)*",
             message = "{review.title.pattern}")
@@ -18,7 +18,7 @@ public class ReviewTransferObject {
     @Max(value = 10, message = "{review.rating.max}")
     private Integer rating;
 
-    @NotNull
+    @NotNull(message = "{review.text.null}")
     @Size(min = 5, max = 2000, message = "{review.reviewText.size}")
     @Pattern(regexp = "[\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Sm}\\p{Ps}\\p{Pe}\\p{Pi}\\p{Pf}]+" +
             "([ '-][\\p{L}\\p{Po}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Sm}\\p{Ps}\\p{Pe}\\p{Pi}\\p{Pf}]+)*",
